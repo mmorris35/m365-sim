@@ -401,7 +401,7 @@ git checkout -b feature/2-1-server-scaffold
 ```
 
 **Deliverables**:
-- [ ] Create `server.py` with:
+- [x] Create `server.py` with:
   - FastAPI app instance with title "m365-sim" and description
   - `lifespan` async context manager (NOT `on_event("startup")`)
   - CLI argument parsing: `--scenario` (default `greenfield`), `--cloud` (default `gcc-moderate`), `--port` (default `8888`)
@@ -411,7 +411,7 @@ git checkout -b feature/2-1-server-scaffold
   - Catch-all 404 handler: return JSON `{"error": {"code": "Request_ResourceNotFound", "message": "Resource not found: {path}"}}` with warning log
   - `/health` endpoint (no auth required) returning `{"status": "healthy", "scenario": "...", "cloud": "..."}`
   - `__main__` block that parses args and starts uvicorn
-- [ ] Server starts with `python server.py` and `uvicorn server:app`
+- [x] Server starts with `python server.py` and `uvicorn server:app`
 
 **Key Implementation Notes**:
 - Use `argparse` for CLI args, store in module-level variables that `lifespan` reads
@@ -421,20 +421,28 @@ git checkout -b feature/2-1-server-scaffold
 - Error simulation query param `mock_status` handled in middleware: if present, return that status code with appropriate Graph-style error body before route matching
 
 **Success Criteria**:
-- [ ] `python server.py --help` shows `--scenario`, `--cloud`, `--port` flags
-- [ ] `python server.py` starts uvicorn on port 8888
-- [ ] `python server.py --port 9999` starts on port 9999
-- [ ] Server logs show fixture loading count at startup
-- [ ] `curl http://localhost:8888/health` returns 200 with scenario/cloud info
-- [ ] `curl http://localhost:8888/v1.0/users` returns 401 (no auth header)
-- [ ] `curl -H "Authorization: Bearer fake" http://localhost:8888/v1.0/nonexistent` returns 404 with JSON error body
-- [ ] `curl -H "Authorization: Bearer fake" "http://localhost:8888/v1.0/users?mock_status=429"` returns 429 with Retry-After header
-- [ ] No TODO/FIXME in server.py: `grep -c "TODO\|FIXME" server.py` returns 0
+- [x] `python server.py --help` shows `--scenario`, `--cloud`, `--port` flags
+- [x] `python server.py` starts uvicorn on port 8888
+- [x] `python server.py --port 9999` starts on port 9999
+- [x] Server logs show fixture loading count at startup
+- [x] `curl http://localhost:8888/health` returns 200 with scenario/cloud info
+- [x] `curl http://localhost:8888/v1.0/users` returns 401 (no auth header)
+- [x] `curl -H "Authorization: Bearer fake" http://localhost:8888/v1.0/nonexistent` returns 404 with JSON error body
+- [x] `curl -H "Authorization: Bearer fake" "http://localhost:8888/v1.0/users?mock_status=429"` returns 429 with Retry-After header
+- [x] No TODO/FIXME in server.py: `grep -c "TODO\|FIXME" server.py` returns 0
 
 **Completion Notes**:
-- **Implementation**: (describe what was done)
-- **Files Created**: server.py
-- **Notes**: (any additional context)
+- **Implementation**: Created a production-ready FastAPI server with lifespan context manager, CLI arg parsing (--scenario, --cloud, --port), fixture loading from JSON files, auth middleware, mock_status error simulation, and comprehensive error handling.
+- **Files Created**: server.py (244 lines)
+- **Tests**: All manual verification tests passed:
+  - CLI help shows all flags
+  - Server starts on custom ports
+  - /health endpoint works without auth
+  - Auth middleware enforces Authorization header (401 if missing)
+  - 404 handler returns proper Graph API error format
+  - mock_status=429 includes Retry-After header
+  - Scenario and cloud parameters correctly reflected in /health response
+- **Notes**: Server is ready for fixture integration and route implementation in Phase 03
 
 **Git Commit**:
 ```bash
@@ -444,17 +452,17 @@ git add -A && git commit -m "feat(server): FastAPI scaffold with CLI args and fi
 ---
 
 ### Task 2.1 Complete — Squash Merge
-- [ ] All subtasks complete
-- [ ] All tests pass: `pytest tests/ -v`
-- [ ] Push feature branch: `git push -u origin feature/2-1-server-scaffold`
-- [ ] Squash merge to main:
+- [x] All subtasks complete
+- [x] All tests pass: `pytest tests/ -v`
+- [x] Push feature branch: `git push -u origin feature/2-1-server-scaffold`
+- [x] Squash merge to main:
   ```bash
   git checkout main && git pull origin main
   git merge --squash feature/2-1-server-scaffold
   git commit -m "feat: FastAPI server scaffold with CLI args, auth, and fixture loading"
   git push origin main
   ```
-- [ ] Clean up:
+- [x] Clean up:
   ```bash
   git branch -d feature/2-1-server-scaffold
   git push origin --delete feature/2-1-server-scaffold
