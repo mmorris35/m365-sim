@@ -1,0 +1,60 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#deviceManagement/deviceCompliancePolicies",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000401",
+      "@odata.type": "#microsoft.graph.windowsCompliancePolicy",
+      "displayName": "CMMC-Windows-Compliance",
+      "description": "CMMC 2.0 Level 2 compliance policy for Windows devices",
+      "createdDateTime": "2024-01-05T08:00:00Z",
+      "lastModifiedDateTime": "2024-01-05T08:00:00Z",
+      "passwordRequired": true,
+      "passwordMinimumLength": 14,
+      "passwordRequiredType": "alphanumeric",
+      "passwordMinutesOfInactivityBeforeLock": 15,
+      "passwordExpirationDays": 90,
+      "passwordPreviousPasswordBlockCount": 24,
+      "requireHealthyDeviceReport": true,
+      "osMinimumVersion": "10.0.19041.0",
+      "encryptionRequired": true,
+      "storageRequireEncryption": true,
+      "firewallRequired": true
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000402",
+      "@odata.type": "#microsoft.graph.iosCompliancePolicy",
+      "displayName": "CMMC-iOS-Compliance",
+      "description": "CMMC 2.0 Level 2 compliance policy for iOS devices",
+      "createdDateTime": "2024-01-08T08:00:00Z",
+      "lastModifiedDateTime": "2024-01-08T08:00:00Z",
+      "passwordRequired": true,
+      "passwordMinimumLength": 6,
+      "passwordRequiredType": "numericComplex",
+      "passwordMinutesOfInactivityBeforeLock": 15,
+      "passwordExpirationDays": 365,
+      "passwordPreviousPasswordBlockCount": 5,
+      "osMinimumVersion": "15.1",
+      "systemIntegrityProtectionEnabled": true,
+      "restrictedApps": [],
+      "deviceCompliancePolicyScheduledActionForRule": []
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000403",
+      "@odata.type": "#microsoft.graph.androidCompliancePolicy",
+      "displayName": "CMMC-Android-Compliance",
+      "description": "CMMC 2.0 Level 2 compliance policy for Android devices",
+      "createdDateTime": "2024-01-08T08:00:00Z",
+      "lastModifiedDateTime": "2024-01-08T08:00:00Z",
+      "passwordRequired": true,
+      "passwordMinimumLength": 8,
+      "passwordRequiredType": "alphanumeric",
+      "passwordMinutesOfInactivityBeforeLock": 15,
+      "passwordExpirationDays": 180,
+      "passwordPreviousPasswordBlockCount": 6,
+      "osMinimumVersion": "12.0",
+      "storageEncryptionRequired": true,
+      "securityPatchLevel": "2024-01-01",
+      "googlePlayProtectEnabled": true
+    }
+  ]
+}

@@ -1,0 +1,259 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#identity/conditionalAccess/policies",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000101",
+      "displayName": "CMMC-MFA-AllUsers",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "users": {
+          "includeUsers": [
+            "All"
+          ],
+          "excludeUsers": [
+            "00000000-0000-0000-0000-000000000011"
+          ]
+        }
+      },
+      "grantControls": {
+        "operator": "AND",
+        "builtInControls": [
+          "mfa"
+        ]
+      },
+      "sessionControls": {
+        "signInFrequency": {
+          "value": 0,
+          "type": "days",
+          "isEnabled": false
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000102",
+      "displayName": "CMMC-MFA-Admins",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "users": {
+          "includeRoles": [
+            "62e90394-69f5-4237-9190-012177145e10",
+            "194ae4cb-b126-40b2-bd5b-6091b380977d"
+          ],
+          "excludeUsers": [
+            "00000000-0000-0000-0000-000000000011"
+          ]
+        }
+      },
+      "grantControls": {
+        "operator": "AND",
+        "builtInControls": [
+          "mfa"
+        ],
+        "customAuthenticationFactors": [
+          "RequirePhishingResistantMFA"
+        ]
+      },
+      "sessionControls": null
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000103",
+      "displayName": "CMMC-Block-Legacy-Auth",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "users": {
+          "includeUsers": [
+            "All"
+          ],
+          "excludeUsers": [
+            "00000000-0000-0000-0000-000000000011"
+          ]
+        },
+        "clientAppTypes": [
+          "exchangeActiveSync",
+          "other"
+        ]
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": [
+          "block"
+        ]
+      },
+      "sessionControls": null
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000104",
+      "displayName": "CMMC-Compliant-Device",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "users": {
+          "includeUsers": [
+            "All"
+          ],
+          "excludeUsers": [
+            "00000000-0000-0000-0000-000000000011"
+          ]
+        },
+        "platforms": {
+          "includePlatforms": [
+            "android",
+            "iOS",
+            "windows"
+          ]
+        }
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": [
+          "compliantDevice",
+          "domainJoinedDevice"
+        ]
+      },
+      "sessionControls": null
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000105",
+      "displayName": "CMMC-Approved-Apps",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "applications": {
+          "includeApplications": [
+            "Office365"
+          ]
+        },
+        "users": {
+          "includeUsers": [
+            "All"
+          ],
+          "excludeUsers": [
+            "00000000-0000-0000-0000-000000000011"
+          ]
+        }
+      },
+      "grantControls": {
+        "operator": "AND",
+        "builtInControls": [
+          "approvedClientsAppRequired"
+        ]
+      },
+      "sessionControls": {
+        "applicationEnforcedRestrictions": {
+          "isEnabled": true
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000106",
+      "displayName": "CMMC-Session-Timeout",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "users": {
+          "includeUsers": [
+            "All"
+          ],
+          "excludeUsers": [
+            "00000000-0000-0000-0000-000000000011"
+          ]
+        }
+      },
+      "grantControls": null,
+      "sessionControls": {
+        "signInFrequency": {
+          "value": 1,
+          "type": "hours",
+          "isEnabled": true
+        },
+        "persistentBrowserMode": {
+          "isEnabled": false
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000107",
+      "displayName": "CMMC-Risk-Based-Access",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "users": {
+          "includeUsers": [
+            "All"
+          ],
+          "excludeUsers": [
+            "00000000-0000-0000-0000-000000000011"
+          ]
+        },
+        "signInRiskLevels": [
+          "high",
+          "medium"
+        ]
+      },
+      "grantControls": {
+        "operator": "AND",
+        "builtInControls": [
+          "mfa"
+        ]
+      },
+      "sessionControls": null
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000108",
+      "displayName": "CMMC-Location-Based",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "users": {
+          "includeUsers": [
+            "All"
+          ],
+          "excludeUsers": [
+            "00000000-0000-0000-0000-000000000011"
+          ]
+        },
+        "locations": {
+          "includeLocations": [
+            "00000000-0000-0000-0000-000000000201"
+          ]
+        }
+      },
+      "grantControls": null,
+      "sessionControls": {
+        "persistentBrowserMode": {
+          "isEnabled": true
+        }
+      }
+    }
+  ]
+}

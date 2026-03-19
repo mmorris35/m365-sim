@@ -1,0 +1,23 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('operator-id')/authentication/methods",
+  "value": [
+    {
+      "@odata.type": "#microsoft.graph.microsoftAuthenticatorAuthenticationMethod",
+      "id": "00000000-0000-0000-0000-000000000020",
+      "displayName": "Mike's iPhone",
+      "deviceTag": "SoftwareTokenActivated",
+      "phoneAppVersion": "6.2208.7949"
+    },
+    {
+      "@odata.type": "#microsoft.graph.passwordAuthenticationMethod",
+      "id": "00000000-0000-0000-0000-000000000021"
+    },
+    {
+      "@odata.type": "#microsoft.graph.fido2AuthenticationMethod",
+      "id": "00000000-0000-0000-0000-000000000022",
+      "displayName": "YubiKey 5C",
+      "createdDateTime": "2024-01-15T10:30:00Z",
+      "creationDateTime": "2024-01-15T10:30:00Z"
+    }
+  ]
+}

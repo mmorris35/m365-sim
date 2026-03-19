@@ -1,0 +1,56 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#deviceManagement/managedDevices",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000301",
+      "deviceName": "CONTOSO-LT001",
+      "osVersion": "Windows 11 Pro",
+      "complianceState": "compliant",
+      "deviceType": "windowsPC",
+      "operatingSystem": "Windows",
+      "ownerType": "company",
+      "enrollmentDateTime": "2024-01-10T09:15:00Z",
+      "lastSyncDateTime": "2025-03-19T14:22:00Z",
+      "isEncrypted": true,
+      "manufacturer": "Dell",
+      "model": "Latitude 5440",
+      "imei": "",
+      "serialNumber": "CN-DELL-001",
+      "udid": ""
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000302",
+      "deviceName": "CONTOSO-WS001",
+      "osVersion": "Windows 11 Pro",
+      "complianceState": "compliant",
+      "deviceType": "windowsPC",
+      "operatingSystem": "Windows",
+      "ownerType": "company",
+      "enrollmentDateTime": "2024-01-12T10:45:00Z",
+      "lastSyncDateTime": "2025-03-19T14:20:00Z",
+      "isEncrypted": true,
+      "manufacturer": "HP",
+      "model": "ProDesk 600 G9",
+      "imei": "",
+      "serialNumber": "CN-HP-001",
+      "udid": ""
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000303",
+      "deviceName": "CONTOSO-iPhone",
+      "osVersion": "17.4.1",
+      "complianceState": "compliant",
+      "deviceType": "iosPhone",
+      "operatingSystem": "iOS",
+      "ownerType": "company",
+      "enrollmentDateTime": "2024-02-01T08:30:00Z",
+      "lastSyncDateTime": "2025-03-19T14:18:00Z",
+      "isEncrypted": true,
+      "manufacturer": "Apple",
+      "model": "iPhone 15 Pro",
+      "imei": "357700000000001",
+      "serialNumber": "HX4K2PHLJ05P",
+      "udid": "00000000-0000-0000-0000-000000000303"
+    }
+  ]
+}

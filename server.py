@@ -32,10 +32,32 @@ PORT = 8888
 
 
 def load_fixtures(cloud: str, scenario: str) -> dict[str, dict]:
-    """Load all JSON fixtures from scenarios/{cloud}/{scenario}/*.json."""
-    fixtures: dict[str, dict] = {}
-    scenario_dir = Path(__file__).parent / "scenarios" / cloud / scenario
+    """Load all JSON fixtures from scenarios/{cloud}/{scenario}/*.json.
 
+    If scenario is not greenfield, load greenfield as base first, then overlay
+    the target scenario. This allows target scenarios to only override files
+    that changed.
+    """
+    fixtures: dict[str, dict] = {}
+    base_path = Path(__file__).parent / "scenarios" / cloud
+
+    # If scenario is not greenfield, load greenfield first as base
+    if scenario != "greenfield":
+        greenfield_dir = base_path / "greenfield"
+        if greenfield_dir.exists():
+            json_files = sorted(greenfield_dir.glob("*.json"))
+            for json_file in json_files:
+                try:
+                    with open(json_file, "r") as f:
+                        fixture_data = json.load(f)
+                    stem = json_file.stem
+                    fixtures[stem] = fixture_data
+                    logger.info(f"Loaded base (greenfield) fixture: {stem}")
+                except Exception as e:
+                    logger.error(f"Failed to load base fixture {json_file}: {e}")
+
+    # Load target scenario, overlaying any greenfield fixtures
+    scenario_dir = base_path / scenario
     if not scenario_dir.exists():
         logger.warning(f"Scenario directory not found: {scenario_dir}")
         return fixtures
