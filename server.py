@@ -9,6 +9,7 @@ fixture loading, auth middleware, and error simulation.
 
 import argparse
 import asyncio
+import copy
 import json
 import logging
 import sys
@@ -29,6 +30,7 @@ logger = logging.getLogger(__name__)
 SCENARIO = "greenfield"
 CLOUD = "gcc-moderate"
 PORT = 8888
+STATEFUL = False
 
 
 def load_fixtures(cloud: str, scenario: str) -> dict[str, dict]:
@@ -83,12 +85,20 @@ async def lifespan(app: FastAPI):
     """FastAPI lifespan context manager for startup/shutdown."""
     # Startup: load fixtures for default cloud
     fixtures = load_fixtures(CLOUD, SCENARIO)
-    app.state.fixtures = fixtures
     app.state.cloud = CLOUD
     app.state.scenario = SCENARIO
+    app.state.stateful = STATEFUL
     # Pre-load alternate cloud fixtures for X-Mock-Cloud header support
     app.state.cloud_fixtures = {CLOUD: fixtures}
-    logger.info(f"Server starting with scenario={SCENARIO}, cloud={CLOUD}")
+
+    # In stateful mode: deep-copy fixtures for baseline, use working copy as mutable
+    if STATEFUL:
+        app.state.baseline_fixtures = copy.deepcopy(fixtures)
+        app.state.fixtures = copy.deepcopy(fixtures)
+        logger.info(f"Server starting in STATEFUL mode with scenario={SCENARIO}, cloud={CLOUD}")
+    else:
+        app.state.fixtures = fixtures
+        logger.info(f"Server starting with scenario={SCENARIO}, cloud={CLOUD}")
 
     yield
 
@@ -516,6 +526,14 @@ async def post_ca_policy(request: Request):
 
     logger.info(f"WRITE: POST /v1.0/identity/conditionalAccess/policies — created policy {body.get('displayName', 'unnamed')}")
 
+    # In stateful mode: add to fixture value array
+    if request.app.state.stateful:
+        if "conditional_access_policies" in request.app.state.fixtures:
+            fixture = request.app.state.fixtures["conditional_access_policies"]
+            if "value" in fixture:
+                # Shallow-copy body to avoid reference issues
+                fixture["value"].append(copy.copy(body))
+
     return JSONResponse(status_code=201, content=body)
 
 
@@ -526,6 +544,18 @@ async def patch_auth_method_config(method_id: str, request: Request):
     body = await request.json()
 
     logger.info(f"WRITE: PATCH /v1.0/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/{method_id} — updated config")
+
+    # In stateful mode: find the config in fixture and merge fields
+    if request.app.state.stateful:
+        if "auth_methods_policy" in request.app.state.fixtures:
+            fixture = request.app.state.fixtures["auth_methods_policy"]
+            if "authenticationMethodConfigurations" in fixture:
+                configs = fixture["authenticationMethodConfigurations"]
+                for config in configs:
+                    if config.get("id") == method_id:
+                        # Merge request body fields into the config
+                        config.update(body)
+                        break
 
     return JSONResponse(status_code=200, content=body)
 
@@ -539,6 +569,14 @@ async def post_compliance_policy(request: Request):
 
     logger.info(f"WRITE: POST /v1.0/deviceManagement/deviceCompliancePolicies — created policy {body.get('displayName', 'unnamed')}")
 
+    # In stateful mode: add to fixture value array
+    if request.app.state.stateful:
+        if "compliance_policies" in request.app.state.fixtures:
+            fixture = request.app.state.fixtures["compliance_policies"]
+            if "value" in fixture:
+                # Shallow-copy body to avoid reference issues
+                fixture["value"].append(copy.copy(body))
+
     return JSONResponse(status_code=201, content=body)
 
 
@@ -551,7 +589,42 @@ async def post_device_configuration(request: Request):
 
     logger.info(f"WRITE: POST /v1.0/deviceManagement/deviceConfigurations — created configuration {body.get('displayName', 'unnamed')}")
 
+    # In stateful mode: add to fixture value array
+    if request.app.state.stateful:
+        if "device_configurations" in request.app.state.fixtures:
+            fixture = request.app.state.fixtures["device_configurations"]
+            if "value" in fixture:
+                # Shallow-copy body to avoid reference issues
+                fixture["value"].append(copy.copy(body))
+
     return JSONResponse(status_code=201, content=body)
+
+
+@app.post("/v1.0/_reset")
+async def reset_fixtures(request: Request):
+    """POST /v1.0/_reset — reset fixtures to baseline (stateful mode only)."""
+    if not request.app.state.stateful:
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error": {
+                    "code": "Request_ResourceNotFound",
+                    "message": "Reset endpoint only available in stateful mode",
+                }
+            },
+        )
+
+    # Reset fixtures from baseline
+    baseline = request.app.state.baseline_fixtures
+    request.app.state.fixtures = copy.deepcopy(baseline)
+    fixtures_count = len(request.app.state.fixtures)
+
+    logger.info(f"WRITE: POST /v1.0/_reset — reset {fixtures_count} fixtures to baseline")
+
+    return JSONResponse(
+        status_code=200,
+        content={"status": "reset", "fixtures_loaded": fixtures_count},
+    )
 
 
 @app.api_route("/{path:path}", methods=["GET", "POST", "PATCH", "DELETE", "PUT"])
@@ -592,6 +665,12 @@ def parse_args():
         default=8888,
         help="Port to run server on (default: 8888)",
     )
+    parser.add_argument(
+        "--stateful",
+        action="store_true",
+        default=False,
+        help="Enable stateful write operations (default: False)",
+    )
 
     return parser.parse_args()
 
@@ -601,10 +680,11 @@ def main():
     args = parse_args()
 
     # Update module-level variables
-    global SCENARIO, CLOUD, PORT
+    global SCENARIO, CLOUD, PORT, STATEFUL
     SCENARIO = args.scenario
     CLOUD = args.cloud
     PORT = args.port
+    STATEFUL = args.stateful
 
     # Configure logging
     logging.basicConfig(
