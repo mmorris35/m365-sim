@@ -1377,20 +1377,20 @@ git checkout -b feature/9-1-stateful-writes
 ```
 
 **Deliverables**:
-- [ ] Modify `server.py` to support stateful write mode:
-  - Add `--stateful` CLI flag (default: False, preserving current stateless behavior)
-  - When `--stateful` is enabled:
-    - `POST /v1.0/identity/conditionalAccess/policies` adds the policy (with generated `id` and `createdDateTime`) to the in-memory `conditional_access_policies` fixture's `value` array
-    - `PATCH /v1.0/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/{method_id}` updates the matching config in the in-memory `auth_methods_policy` fixture
-    - `POST /v1.0/deviceManagement/deviceCompliancePolicies` adds to `compliance_policies` fixture's `value` array
-    - `POST /v1.0/deviceManagement/deviceConfigurations` adds to `device_configurations` fixture's `value` array
-  - Subsequent GETs return mutated state
-  - When `--stateful` is disabled (default), behavior is unchanged from current implementation
-- [ ] Add `POST /v1.0/_reset` endpoint (only available when `--stateful`):
-  - Reloads all fixtures from disk, resetting in-memory state to original
-  - Returns `{"status": "reset", "fixtures_loaded": N}`
-  - Logs the reset operation
-- [ ] Deep-copy fixtures at startup so reset restores clean state (use `copy.deepcopy` on loaded fixtures to create the baseline)
+- [x] Modify `server.py` to support stateful write mode:
+  - [x] Add `--stateful` CLI flag (default: False, preserving current stateless behavior)
+  - [x] When `--stateful` is enabled:
+    - [x] `POST /v1.0/identity/conditionalAccess/policies` adds the policy (with generated `id` and `createdDateTime`) to the in-memory `conditional_access_policies` fixture's `value` array
+    - [x] `PATCH /v1.0/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/{method_id}` updates the matching config in the in-memory `auth_methods_policy` fixture
+    - [x] `POST /v1.0/deviceManagement/deviceCompliancePolicies` adds to `compliance_policies` fixture's `value` array
+    - [x] `POST /v1.0/deviceManagement/deviceConfigurations` adds to `device_configurations` fixture's `value` array
+  - [x] Subsequent GETs return mutated state
+  - [x] When `--stateful` is disabled (default), behavior is unchanged from current implementation
+- [x] Add `POST /v1.0/_reset` endpoint (only available when `--stateful`):
+  - [x] Reloads all fixtures from disk, resetting in-memory state to original
+  - [x] Returns `{"status": "reset", "fixtures_loaded": N}`
+  - [x] Logs the reset operation
+- [x] Deep-copy fixtures at startup so reset restores clean state (use `copy.deepcopy` on loaded fixtures to create the baseline)
 
 **Key Implementation Notes**:
 - Store baseline fixtures in `app.state.baseline_fixtures` (deep copy at startup)
@@ -1401,13 +1401,13 @@ git checkout -b feature/9-1-stateful-writes
 - PATCH for auth methods: find the config by `id` in `authenticationMethodConfigurations` array, merge request body fields into it
 
 **Success Criteria**:
-- [ ] `python server.py --stateful` starts server in stateful mode
-- [ ] `python server.py` (no flag) preserves current stateless behavior — all existing tests pass unchanged
-- [ ] In stateful mode: POST a CA policy, then GET policies returns it
-- [ ] In stateful mode: PATCH fido2 to enabled, then GET auth methods policy shows fido2 enabled
-- [ ] In stateful mode: POST /_reset restores original fixture state
-- [ ] In stateful mode: POST a CA policy, POST /_reset, GET policies returns empty (original state)
-- [ ] No TODO/FIXME in server.py
+- [x] `python server.py --stateful` starts server in stateful mode
+- [x] `python server.py` (no flag) preserves current stateless behavior — all existing tests pass unchanged
+- [x] In stateful mode: POST a CA policy, then GET policies returns it
+- [x] In stateful mode: PATCH fido2 to enabled, then GET auth methods policy shows fido2 enabled
+- [x] In stateful mode: POST /_reset restores original fixture state
+- [x] In stateful mode: POST a CA policy, POST /_reset, GET policies returns empty (original state)
+- [x] No TODO/FIXME in server.py
 
 **Git Commit**:
 ```bash
@@ -1422,24 +1422,24 @@ git add -A && git commit -m "feat(stateful): in-memory state mutation with --sta
 - [x] 9.1.1: In-Memory State Mutation and Reset
 
 **Deliverables**:
-- [ ] Create `tests/test_stateful.py` with:
-  - Separate `mock_server_stateful` fixture that starts server with `--stateful`
-  - `test_post_ca_policy_then_get` — POST a CA policy, GET policies, verify the new policy appears in the response
-  - `test_post_multiple_ca_policies` — POST 3 policies, GET returns all 3 (plus any originals)
-  - `test_patch_auth_method_then_get` — PATCH fido2 to enabled, GET auth methods policy, verify fido2 is now enabled
-  - `test_patch_auth_method_preserves_others` — PATCH fido2, verify other methods unchanged
-  - `test_post_compliance_policy_then_get` — POST compliance policy, GET returns it
-  - `test_post_device_config_then_get` — POST device config, GET returns it
-  - `test_reset_clears_mutations` — POST policies, POST /_reset, GET returns original empty state
-  - `test_reset_returns_fixture_count` — POST /_reset returns fixture count in response
-  - `test_stateless_mode_unchanged` — existing `mock_server` (no --stateful) still returns stateless behavior (POST then GET shows no change)
-  - `test_deploy_then_assess_flow` — full workflow: POST 3 CA policies + PATCH 2 auth methods, then GET all endpoints and verify the mutations are visible (this is the key deploy-then-verify test)
-- [ ] All existing tests in test_server.py, test_query_write_error.py, test_hardened.py still pass (they use stateless mode)
+- [x] Create `tests/test_stateful.py` with:
+  - [x] Separate `mock_server_stateful` fixture that starts server with `--stateful`
+  - [x] `test_post_ca_policy_then_get` — POST a CA policy, GET policies, verify the new policy appears in the response
+  - [x] `test_post_multiple_ca_policies` — POST 3 policies, GET returns all 3 (plus any originals)
+  - [x] `test_patch_auth_method_then_get` — PATCH fido2 to enabled, GET auth methods policy, verify fido2 is now enabled
+  - [x] `test_patch_auth_method_preserves_others` — PATCH fido2, verify other methods unchanged
+  - [x] `test_post_compliance_policy_then_get` — POST compliance policy, GET returns it
+  - [x] `test_post_device_config_then_get` — POST device config, GET returns it
+  - [x] `test_reset_clears_mutations` — POST policies, POST /_reset, GET returns original empty state
+  - [x] `test_reset_returns_fixture_count` — POST /_reset returns fixture count in response
+  - [x] `test_stateless_mode_unchanged` — existing `mock_server` (no --stateful) still returns stateless behavior (POST then GET shows no change)
+  - [x] `test_deploy_then_assess_flow` — full workflow: POST 3 CA policies + PATCH 2 auth methods, then GET all endpoints and verify the mutations are visible (this is the key deploy-then-verify test)
+- [x] All existing tests in test_server.py, test_query_write_error.py, test_hardened.py still pass (they use stateless mode)
 
 **Success Criteria**:
-- [ ] `pytest tests/test_stateful.py -v` all green
-- [ ] At least 10 stateful-specific tests
-- [ ] `pytest tests/ -v` — ALL tests pass (stateful + existing stateless)
+- [x] `pytest tests/test_stateful.py -v` all green
+- [x] At least 10 stateful-specific tests (11 tests implemented)
+- [x] `pytest tests/ -v` — ALL tests pass (90/90 passing: stateful + existing stateless)
 
 **Git Commit**:
 ```bash
@@ -1449,21 +1449,36 @@ git add -A && git commit -m "test(stateful): deploy-then-verify and reset tests 
 ---
 
 ### Task 9.1 Complete — Squash Merge
-- [ ] All subtasks complete (9.1.1 and 9.1.2)
-- [ ] All tests pass: `pytest tests/ -v`
-- [ ] Push feature branch: `git push -u origin feature/9-1-stateful-writes`
-- [ ] Squash merge to main:
-  ```bash
-  git checkout main && git pull origin main
-  git merge --squash feature/9-1-stateful-writes
-  git commit -m "feat: stateful write operations with --stateful flag and /_reset endpoint"
-  git push origin main
-  ```
-- [ ] Clean up:
-  ```bash
-  git branch -d feature/9-1-stateful-writes
-  git push origin --delete feature/9-1-stateful-writes
-  ```
+- [x] All subtasks complete (9.1.1 and 9.1.2)
+- [x] All tests pass: 90/90 tests passing
+- [x] Push feature branch: `git push -u origin feature/9-1-stateful-writes`
+- [x] Squash merge to main: commit `9197f2c`
+- [x] Clean up: feature branch deleted locally and remotely
+
+**Completion Notes**:
+- **Implementation**: Stateful write operations fully implemented with --stateful CLI flag, in-memory mutation, and /_reset endpoint
+- **Files Created**:
+  - `tests/test_stateful.py` - 521 lines, 11 comprehensive tests
+- **Files Modified**:
+  - `server.py` - added `copy` import, STATEFUL global, deep-copy fixtures on startup, stateful mutation in all 4 write handlers, POST /_reset endpoint, --stateful CLI flag
+- **Tests**: 11 stateful tests, all passing
+  - TestStatefulPostOperations: 4 tests (CA policies, compliance policies, device configs)
+  - TestStatefulPatchOperations: 2 tests (auth method patching, preserving other methods)
+  - TestReset: 2 tests (reset clears mutations, returns fixture count)
+  - TestStatelessModeUnchanged: 1 test (stateless mode still works)
+  - TestDeployThenAssessFlow: 2 tests (full deploy-then-verify workflow, deploy-reset-verify)
+- **Full Suite**: 90/90 tests passing (11 new stateful + 79 existing)
+- **Features Implemented**:
+  - `--stateful` CLI flag enables in-memory mutation mode
+  - POST /v1.0/identity/conditionalAccess/policies — appends to fixture value array when stateful
+  - POST /v1.0/deviceManagement/deviceCompliancePolicies — appends to fixture value array when stateful
+  - POST /v1.0/deviceManagement/deviceConfigurations — appends to fixture value array when stateful
+  - PATCH /v1.0/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/{method_id} — merges into config when stateful
+  - POST /v1.0/_reset — resets all fixtures from deep-copied baseline (stateful mode only)
+  - Deep-copy baseline at startup for clean reset capability
+  - All mutations tracked in app.state.fixtures; baseline preserved in app.state.baseline_fixtures
+- **Key Pattern**: `if request.app.state.stateful:` gates all write mutations, preserving stateless behavior by default
+- **Notes**: All metrics match specification exactly; deploy-then-verify workflow fully testable
 
 ---
 
