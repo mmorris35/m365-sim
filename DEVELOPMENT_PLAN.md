@@ -215,12 +215,22 @@ Each entry records a design question, the options considered, the resolution, an
 - **Files Created**: docs/decisions.md
 - **Notes**: (record any additional context from the discussion)
 
+**Git Commit**:
+```bash
+git add docs/decisions.md
+git commit -m "docs(decisions): record 5 design decisions [0.1.1]"
+```
+
 ---
 
 ### Task 0.1 Complete
 - [ ] All 5 decisions resolved and recorded
-- [ ] `docs/decisions.md` committed to main
-- [ ] Commit: `git add docs/decisions.md && git commit -m "docs: record 5 design decisions for m365-sim MVP"`
+- [ ] Git commit:
+  ```bash
+  git add docs/decisions.md
+  git commit -m "docs(decisions): record 5 design decisions for m365-sim MVP [0.1.1]"
+  git push origin main
+  ```
 
 ---
 
@@ -237,6 +247,12 @@ Each entry records a design question, the options considered, the resolution, an
 
 **Prerequisites**:
 - [x] 0.1.1: Resolve Open Design Questions
+
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/1-1-repo-bootstrap
+```
 
 **Deliverables**:
 - [ ] Create all directories:
@@ -333,14 +349,29 @@ Each entry records a design question, the options considered, the resolution, an
   - (filename) - (line count) lines
 - **Notes**: (any additional context)
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(bootstrap): directory structure and dependencies [1.1.1]"
+```
+
 ---
 
 ### Task 1.1 Complete — Squash Merge
 - [ ] All subtasks complete
-- [ ] Squash merge to main: `git checkout main && git merge --squash feature/1-1-repo-bootstrap`
-- [ ] Commit: `git commit -m "feat: bootstrap repo structure, dependencies, and README"`
-- [ ] Delete branch: `git branch -d feature/1-1-repo-bootstrap`
-- [ ] Push: `git push origin main`
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/1-1-repo-bootstrap`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/1-1-repo-bootstrap
+  git commit -m "feat: bootstrap repo structure, dependencies, and README"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/1-1-repo-bootstrap
+  git push origin --delete feature/1-1-repo-bootstrap
+  ```
 
 ---
 
@@ -357,6 +388,12 @@ Each entry records a design question, the options considered, the resolution, an
 
 **Prerequisites**:
 - [x] 1.1.1: Directory Structure and Dependencies
+
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/2-1-server-scaffold
+```
 
 **Deliverables**:
 - [ ] Create `server.py` with:
@@ -394,14 +431,29 @@ Each entry records a design question, the options considered, the resolution, an
 - **Files Created**: server.py
 - **Notes**: (any additional context)
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(server): FastAPI scaffold with CLI args and fixture loading [2.1.1]"
+```
+
 ---
 
 ### Task 2.1 Complete — Squash Merge
 - [ ] All subtasks complete
-- [ ] Squash merge to main: `git checkout main && git merge --squash feature/2-1-server-scaffold`
-- [ ] Commit: `git commit -m "feat: FastAPI server scaffold with CLI args, auth, and fixture loading"`
-- [ ] Delete branch: `git branch -d feature/2-1-server-scaffold`
-- [ ] Push: `git push origin main`
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/2-1-server-scaffold`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/2-1-server-scaffold
+  git commit -m "feat: FastAPI server scaffold with CLI args, auth, and fixture loading"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/2-1-server-scaffold
+  git push origin --delete feature/2-1-server-scaffold
+  ```
 
 ---
 
@@ -418,6 +470,12 @@ Each entry records a design question, the options considered, the resolution, an
 
 **Prerequisites**:
 - [x] 2.1.1: FastAPI Server with CLI Args and Fixture Loading
+
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/3-1-route-table
+```
 
 **Deliverables**:
 - [ ] Add routes to `server.py` for:
@@ -459,6 +517,11 @@ def get_fixture(name: str, request: Request, top: int | None = None) -> JSONResp
 - [ ] `$top=1` on `/v1.0/users` returns only 1 user in `value` array
 - [ ] Requests with `$filter` param are logged but return full fixture
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(routes): identity and user endpoints [3.1.1]"
+```
+
 ---
 
 **Subtask 3.1.2: Security, Devices, and Conditional Access Endpoints (Single Session)**
@@ -483,6 +546,11 @@ def get_fixture(name: str, request: Request, top: int | None = None) -> JSONResp
 **Success Criteria**:
 - [ ] All 11 endpoints return fixture data
 - [ ] `$top=1` works on security/secureScores
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(routes): security, devices, and CA endpoints [3.1.2]"
+```
 
 ---
 
@@ -512,6 +580,11 @@ def get_fixture(name: str, request: Request, top: int | None = None) -> JSONResp
 - [ ] `/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/fido2` returns only the FIDO2 config object
 - [ ] `$top=10` on `/auditLogs/signIns` truncates results
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(routes): roles, auth policy, audit, and info protection endpoints [3.1.3]"
+```
+
 ---
 
 ### Task 3.2: Write Operation Stubs
@@ -538,14 +611,29 @@ def get_fixture(name: str, request: Request, top: int | None = None) -> JSONResp
 - [ ] Write operations are logged with method, path, and body summary
 - [ ] `?mock_status=403` on a POST returns 403
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(routes): POST and PATCH write stubs [3.2.1]"
+```
+
 ---
 
 ### Task 3.2 Complete — Squash Merge
 - [ ] All subtasks complete (3.1.1 through 3.2.1)
-- [ ] Squash merge to main: `git checkout main && git merge --squash feature/3-1-route-table`
-- [ ] Commit: `git commit -m "feat: complete route table with all GET endpoints, write stubs, and query param handling"`
-- [ ] Delete branch: `git branch -d feature/3-1-route-table`
-- [ ] Push: `git push origin main`
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/3-1-route-table`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/3-1-route-table
+  git commit -m "feat: complete route table with all GET endpoints, write stubs, and query param handling"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/3-1-route-table
+  git push origin --delete feature/3-1-route-table
+  ```
 
 ---
 
@@ -563,6 +651,12 @@ def get_fixture(name: str, request: Request, top: int | None = None) -> JSONResp
 **Prerequisites**:
 - [x] 3.2.1: POST and PATCH Stubs
 
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/4-1-greenfield-fixtures
+```
+
 **Deliverables**:
 - [ ] Create `scenarios/gcc-moderate/greenfield/organization.json` — Contoso Defense LLC with G5 assigned plans (exchange, MDE, SCO, AADPremium), per kickoff spec
 - [ ] Create `scenarios/gcc-moderate/greenfield/users.json` — Mike Morris (GA) + BreakGlass Admin, per kickoff spec
@@ -579,6 +673,11 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 - [ ] `users.json` has exactly 2 users
 - [ ] `me_auth_methods.json` has Authenticator + password (no FIDO2)
 - [ ] Server starts and serves these fixtures: `python server.py` then `curl -H "Authorization: Bearer x" http://localhost:8888/v1.0/users`
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(fixtures): organization, users, and identity fixtures [4.1.1]"
+```
 
 ---
 
@@ -609,6 +708,11 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 - [ ] `auth_methods_policy.json` has 4 auth method configurations all with `state: "disabled"`
 - [ ] `audit_sign_ins.json` has exactly 1 sign-in entry
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(fixtures): security, audit, and empty fixtures [4.1.2]"
+```
+
 ---
 
 **Subtask 4.1.3: Roles, Applications, and Service Principals Fixtures (Single Session)**
@@ -633,16 +737,31 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 - [ ] `service_principals.json` includes Microsoft Graph SP with correct appId
 - [ ] Server starts and all endpoints return data: quick smoke test hitting each new endpoint
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(fixtures): roles, applications, and service principals [4.1.3]"
+```
+
 ---
 
 ### Task 4.1 Complete — Squash Merge
 - [ ] All subtasks complete (4.1.1 through 4.1.3)
 - [ ] All ~27 fixture files created in `scenarios/gcc-moderate/greenfield/`
 - [ ] `ls scenarios/gcc-moderate/greenfield/*.json | wc -l` shows correct count
-- [ ] Squash merge to main: `git checkout main && git merge --squash feature/4-1-greenfield-fixtures`
-- [ ] Commit: `git commit -m "feat: complete greenfield GCC Moderate fixture set"`
-- [ ] Delete branch: `git branch -d feature/4-1-greenfield-fixtures`
-- [ ] Push: `git push origin main`
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/4-1-greenfield-fixtures`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/4-1-greenfield-fixtures
+  git commit -m "feat: complete greenfield GCC Moderate fixture set"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/4-1-greenfield-fixtures
+  git push origin --delete feature/4-1-greenfield-fixtures
+  ```
 
 ---
 
@@ -659,6 +778,12 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 
 **Prerequisites**:
 - [x] 4.1.3: Roles, Applications, and Service Principals Fixtures
+
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/5-1-smoke-tests
+```
 
 **Deliverables**:
 - [ ] Create `tests/conftest.py` with:
@@ -695,6 +820,11 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 - [ ] At least 18 test functions
 - [ ] No TODO/FIXME in test files
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(smoke): subprocess fixture and GET endpoint tests [5.1.1]"
+```
+
 ---
 
 **Subtask 5.1.2: Query Param, Write, and Error Simulation Tests (Single Session)**
@@ -720,15 +850,29 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 - [ ] No test uses mocks — all tests hit real HTTP via subprocess
 - [ ] `grep -c "TODO\|FIXME" tests/*.py` returns 0
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(smoke): query param, write, and error simulation tests [5.1.2]"
+```
+
 ---
 
 ### Task 5.1 Complete — Squash Merge
 - [ ] All subtasks complete (5.1.1 and 5.1.2)
-- [ ] `pytest tests/ -v` all green
-- [ ] Squash merge to main: `git checkout main && git merge --squash feature/5-1-smoke-tests`
-- [ ] Commit: `git commit -m "test: comprehensive smoke tests for all endpoints, auth, query params, and write stubs"`
-- [ ] Delete branch: `git branch -d feature/5-1-smoke-tests`
-- [ ] Push: `git push origin main`
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/5-1-smoke-tests`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/5-1-smoke-tests
+  git commit -m "test: comprehensive smoke tests for all endpoints, auth, query params, and write stubs"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/5-1-smoke-tests
+  git push origin --delete feature/5-1-smoke-tests
+  ```
 
 ---
 
@@ -745,6 +889,12 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 
 **Prerequisites**:
 - [x] 5.1.2: Query Param, Write, and Error Simulation Tests
+
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/6-1-hardened-fixtures
+```
 
 **Deliverables**:
 - [ ] Create `scenarios/gcc-moderate/hardened/conditional_access_policies.json` with 8 CMMC policies:
@@ -774,6 +924,11 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 - [ ] No policy has `"state": "enabled"` (only `"enabledForReportingButNotEnforced"`)
 - [ ] `auth_methods_policy.json` has 3 enabled + 1 disabled method
 - [ ] `me_auth_methods.json` has 3 entries (Authenticator, password, FIDO2)
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(hardened): CA policies and auth methods [6.1.1]"
+```
 
 ---
 
@@ -809,6 +964,11 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 - [ ] Hardened scenario inherits greenfield fixtures for unchanged endpoints (e.g., `/users` returns same data)
 - [ ] Hardened CA policies endpoint returns 8 policies
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(hardened): devices, compliance, and shared fixtures [6.1.2]"
+```
+
 ---
 
 **Subtask 6.1.3: Hardened Scenario Smoke Tests (Single Session)**
@@ -832,15 +992,29 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 - [ ] `pytest tests/test_hardened.py -v` all green
 - [ ] At least 8 hardened-specific tests
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(hardened): hardened scenario smoke tests [6.1.3]"
+```
+
 ---
 
 ### Task 6.1 Complete — Squash Merge
 - [ ] All subtasks complete (6.1.1 through 6.1.3)
-- [ ] `pytest tests/ -v` all green (greenfield + hardened tests)
-- [ ] Squash merge to main: `git checkout main && git merge --squash feature/6-1-hardened-fixtures`
-- [ ] Commit: `git commit -m "feat: hardened scenario with CMMC CA policies, compliant devices, and enabled auth methods"`
-- [ ] Delete branch: `git branch -d feature/6-1-hardened-fixtures`
-- [ ] Push: `git push origin main`
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/6-1-hardened-fixtures`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/6-1-hardened-fixtures
+  git commit -m "feat: hardened scenario with CMMC CA policies, compliant devices, and enabled auth methods"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/6-1-hardened-fixtures
+  git push origin --delete feature/6-1-hardened-fixtures
+  ```
 
 ---
 
@@ -857,6 +1031,12 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 
 **Prerequisites**:
 - [x] 6.1.3: Hardened Scenario Smoke Tests
+
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/7-1-gcc-high-scaffold
+```
 
 **Deliverables**:
 - [ ] Create `scenarios/gcc-high/greenfield/_README.md` documenting:
@@ -883,14 +1063,29 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 - [ ] `python server.py --cloud gcc-high` starts without error
 - [ ] `curl -H "Authorization: Bearer x" http://localhost:8888/v1.0/users` returns placeholder data
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(gcc-high): directory structure and documentation [7.1.1]"
+```
+
 ---
 
 ### Task 7.1 Complete — Squash Merge
 - [ ] All subtasks complete
-- [ ] Squash merge to main: `git checkout main && git merge --squash feature/7-1-gcc-high-scaffold`
-- [ ] Commit: `git commit -m "feat: GCC High scaffold with URL documentation and placeholder fixtures"`
-- [ ] Delete branch: `git branch -d feature/7-1-gcc-high-scaffold`
-- [ ] Push: `git push origin main`
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/7-1-gcc-high-scaffold`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/7-1-gcc-high-scaffold
+  git commit -m "feat: GCC High scaffold with URL documentation and placeholder fixtures"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/7-1-gcc-high-scaffold
+  git push origin --delete feature/7-1-gcc-high-scaffold
+  ```
 
 ---
 
@@ -907,6 +1102,12 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 
 **Prerequisites**:
 - [x] 7.1.1: GCC High Directory and Documentation
+
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/8-1-tenant-builder
+```
 
 **Deliverables**:
 - [ ] Create `builder/tenant_builder.py` with:
@@ -935,6 +1136,11 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 - [ ] Generated fixtures match the hand-authored greenfield fixtures in structure
 - [ ] `python -m json.tool < /tmp/test-fixtures/users.json` succeeds (valid JSON)
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(builder): core TenantBuilder class [8.1.1]"
+```
+
 ---
 
 **Subtask 8.1.2: TenantBuilder Tests (Single Session)**
@@ -958,15 +1164,29 @@ All fixtures must include `@odata.context` fields matching real Graph API respon
 - [ ] At least 8 tests
 - [ ] Full test suite still passes: `pytest tests/ -v`
 
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(builder): TenantBuilder tests [8.1.2]"
+```
+
 ---
 
 ### Task 8.1 Complete — Squash Merge
 - [ ] All subtasks complete (8.1.1 and 8.1.2)
-- [ ] `pytest tests/ -v` all green
-- [ ] Squash merge to main: `git checkout main && git merge --squash feature/8-1-tenant-builder`
-- [ ] Commit: `git commit -m "feat: TenantBuilder fluent API with greenfield/hardened presets"`
-- [ ] Delete branch: `git branch -d feature/8-1-tenant-builder`
-- [ ] Push: `git push origin main`
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/8-1-tenant-builder`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/8-1-tenant-builder
+  git commit -m "feat: TenantBuilder fluent API with greenfield/hardened presets"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/8-1-tenant-builder
+  git push origin --delete feature/8-1-tenant-builder
+  ```
 
 ---
 
