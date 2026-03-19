@@ -57,9 +57,12 @@ def get_free_port() -> int:
         return s.getsockname()[1]
 
 
-def start_server(port: int, scenario: str = "greenfield") -> subprocess.Popen:
+def start_server(port: int, scenario: str = "greenfield", stateful: bool = False) -> subprocess.Popen:
+    cmd = [sys.executable, "server.py", "--port", str(port), "--scenario", scenario]
+    if stateful:
+        cmd.append("--stateful")
     proc = subprocess.Popen(
-        [sys.executable, "server.py", "--port", str(port), "--scenario", scenario],
+        cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -455,6 +458,159 @@ def deploy_remediation(client: GraphClient) -> list[tuple[str, bool, str]]:
 
 
 # ---------------------------------------------------------------------------
+# Stateful deploy-then-assess — the full remediation loop in one server
+# ---------------------------------------------------------------------------
+
+def deploy_then_assess(client: GraphClient) -> list[tuple[str, bool, str]]:
+    """Deploy remediation to a stateful server, then assess the result."""
+    results = []
+
+    # --- Pre-assess: greenfield should be empty ---
+    policies_before = client.get_ca_policies()
+    results.append(("PRE: CA policies empty", len(policies_before) == 0,
+                     f"{len(policies_before)} policies"))
+
+    policy_before = client.get_auth_methods_policy()
+    fido2_before = next((c for c in policy_before.get("authenticationMethodConfigurations", [])
+                         if c.get("id") == "fido2"), {})
+    results.append(("PRE: FIDO2 disabled", fido2_before.get("state") == "disabled",
+                     f"fido2 state={fido2_before.get('state')}"))
+
+    # --- Deploy: POST CA policies ---
+    for name in ["CMMC-MFA-AllUsers", "CMMC-Block-Legacy-Auth", "CMMC-Compliant-Device",
+                  "CMMC-Approved-Apps", "CMMC-Session-Timeout"]:
+        r = client.post("/v1.0/identity/conditionalAccess/policies", {
+            "displayName": name,
+            "state": "enabledForReportingButNotEnforced",
+            "conditions": {
+                "users": {"includeUsers": ["All"], "excludeUsers": [BREAKGLASS_ID]},
+                "applications": {"includeApplications": ["All"]}
+            },
+            "grantControls": {"operator": "OR", "builtInControls": ["mfa"]}
+        })
+        results.append((f"DEPLOY: POST {name}", r.status_code == 201,
+                         f"{r.status_code}"))
+
+    # --- Deploy: PATCH auth methods ---
+    for method in ["fido2", "microsoftAuthenticator"]:
+        r = client.patch(
+            f"/v1.0/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/{method}",
+            {"state": "enabled"})
+        results.append((f"DEPLOY: PATCH {method} -> enabled", r.status_code == 200,
+                         f"{r.status_code}"))
+
+    # --- Post-assess: verify mutations are visible ---
+    policies_after = client.get_ca_policies()
+    results.append(("POST-ASSESS: 5 CA policies now exist", len(policies_after) == 5,
+                     f"{len(policies_after)} policies"))
+
+    policy_after = client.get_auth_methods_policy()
+    fido2_after = next((c for c in policy_after.get("authenticationMethodConfigurations", [])
+                        if c.get("id") == "fido2"), {})
+    results.append(("POST-ASSESS: FIDO2 now enabled", fido2_after.get("state") == "enabled",
+                     f"fido2 state={fido2_after.get('state')}"))
+
+    msauth_after = next((c for c in policy_after.get("authenticationMethodConfigurations", [])
+                         if c.get("id") == "microsoftAuthenticator"), {})
+    results.append(("POST-ASSESS: Authenticator now enabled", msauth_after.get("state") == "enabled",
+                     f"microsoftAuthenticator state={msauth_after.get('state')}"))
+
+    # --- Reset and verify clean state ---
+    r = client.post("/v1.0/_reset", {})
+    results.append(("RESET: restore baseline", r.status_code == 200,
+                     f"{r.status_code}, fixtures={r.json().get('fixtures_loaded')}"))
+
+    policies_reset = client.get_ca_policies()
+    results.append(("POST-RESET: CA policies empty again", len(policies_reset) == 0,
+                     f"{len(policies_reset)} policies"))
+
+    policy_reset = client.get_auth_methods_policy()
+    fido2_reset = next((c for c in policy_reset.get("authenticationMethodConfigurations", [])
+                        if c.get("id") == "fido2"), {})
+    results.append(("POST-RESET: FIDO2 disabled again", fido2_reset.get("state") == "disabled",
+                     f"fido2 state={fido2_reset.get('state')}"))
+
+    return results
+
+
+# ---------------------------------------------------------------------------
+# $filter tests — verify the OData filter engine works via real HTTP
+# ---------------------------------------------------------------------------
+
+def test_filters(client: GraphClient, hardened_client: GraphClient | None = None) -> list[tuple[str, bool, str]]:
+    """Test OData $filter engine via real HTTP requests."""
+    results = []
+
+    # Filter users by type
+    r = client.get("/v1.0/users", params={"$filter": "userType eq 'Member'"})
+    members = r.json().get("value", [])
+    results.append(("$filter: users where Member", len(members) == 2,
+                     f"{len(members)} members"))
+
+    r = client.get("/v1.0/users", params={"$filter": "userType eq 'Guest'"})
+    guests = r.json().get("value", [])
+    results.append(("$filter: users where Guest", len(guests) == 0,
+                     f"{len(guests)} guests"))
+
+    # Filter service principals by appId
+    r = client.get("/v1.0/servicePrincipals",
+                    params={"$filter": "appId eq '00000003-0000-0000-c000-000000000000'"})
+    sps = r.json().get("value", [])
+    results.append(("$filter: SP by Graph appId", len(sps) == 1,
+                     f"{len(sps)} matches, name={sps[0].get('displayName') if sps else '?'}"))
+
+    # Filter + $top combo
+    r = client.get("/v1.0/users", params={"$filter": "userType eq 'Member'", "$top": "1"})
+    combo = r.json().get("value", [])
+    results.append(("$filter + $top=1", len(combo) == 1,
+                     f"{len(combo)} result"))
+
+    # Compound filter
+    r = client.get("/v1.0/users",
+                    params={"$filter": "userType eq 'Member' and accountEnabled eq true"})
+    compound = r.json().get("value", [])
+    results.append(("$filter: compound (Member AND enabled)", len(compound) == 2,
+                     f"{len(compound)} matches"))
+
+    # Graceful degradation on bad syntax
+    r = client.get("/v1.0/users", params={"$filter": "this is not valid OData!!!"})
+    bad = r.json().get("value", [])
+    results.append(("$filter: bad syntax -> full result", len(bad) == 2,
+                     f"{len(bad)} (graceful degradation)"))
+
+    # Hardened scenario filters
+    if hardened_client:
+        r = hardened_client.get("/v1.0/identity/conditionalAccess/policies",
+                                 params={"$filter": "state eq 'enabledForReportingButNotEnforced'"})
+        ca = r.json().get("value", [])
+        results.append(("$filter: hardened CA by report-only state", len(ca) == 8,
+                         f"{len(ca)} policies"))
+
+        r = hardened_client.get("/v1.0/deviceManagement/managedDevices",
+                                 params={"$filter": "complianceState eq 'compliant'"})
+        devices = r.json().get("value", [])
+        results.append(("$filter: hardened compliant devices", len(devices) == 3,
+                         f"{len(devices)} compliant devices"))
+
+    return results
+
+
+def print_results(title: str, results: list[tuple[str, bool, str]]):
+    print(f"\n{'=' * 70}")
+    print(f"  {title}")
+    print(f"{'=' * 70}")
+
+    for name, ok, detail in results:
+        icon = "\033[32mOK\033[0m  " if ok else "\033[31mFAIL\033[0m"
+        print(f"  {icon}  {name}")
+        print(f"        \033[90m{detail}\033[0m")
+
+    passed = sum(1 for _, ok, _ in results if ok)
+    print(f"\n  Result: {passed}/{len(results)} checks passed")
+    print(f"{'=' * 70}")
+
+
+# ---------------------------------------------------------------------------
 # Output formatting
 # ---------------------------------------------------------------------------
 
@@ -503,36 +659,40 @@ def print_deploy(results: list[tuple[str, bool, str]]):
 
 def main():
     parser = argparse.ArgumentParser(description="m365-sim Test Harness")
-    parser.add_argument("--workflow", choices=["assess", "deploy", "all"], default="all")
+    parser.add_argument("--workflow",
+                        choices=["assess", "deploy", "stateful", "filter", "all"],
+                        default="all")
     parser.add_argument("--port", type=int, default=0, help="Port (0 = auto)")
     args = parser.parse_args()
 
-    port1 = args.port or get_free_port()
-    port2 = get_free_port()
-    greenfield_proc = None
-    hardened_proc = None
+    all_ok = True
+    ports = [args.port or get_free_port(), get_free_port(), get_free_port(), get_free_port()]
+    procs: list[subprocess.Popen | None] = []
+
+    def cleanup():
+        for p in procs:
+            if p:
+                stop_server(p)
 
     try:
+        # ---- ASSESS workflow ----
         if args.workflow in ("assess", "all"):
-            # --- Assess greenfield ---
             print("\nStarting greenfield server...")
-            greenfield_proc = start_server(port1, "greenfield")
-            client = GraphClient(f"http://localhost:{port1}")
+            proc = start_server(ports[0], "greenfield")
+            procs.append(proc)
+            client = GraphClient(f"http://localhost:{ports[0]}")
             greenfield_result = assess_tenant(client, "greenfield")
             print_assessment(greenfield_result)
-            stop_server(greenfield_proc)
-            greenfield_proc = None
+            stop_server(proc); procs.remove(proc)
 
-            # --- Assess hardened ---
             print("\nStarting hardened server...")
-            hardened_proc = start_server(port2, "hardened")
-            client = GraphClient(f"http://localhost:{port2}")
+            proc = start_server(ports[1], "hardened")
+            procs.append(proc)
+            client = GraphClient(f"http://localhost:{ports[1]}")
             hardened_result = assess_tenant(client, "hardened")
             print_assessment(hardened_result)
-            stop_server(hardened_proc)
-            hardened_proc = None
+            stop_server(proc); procs.remove(proc)
 
-            # Summary comparison
             print(f"\n{'=' * 70}")
             print(f"  COMPARISON")
             print(f"{'=' * 70}")
@@ -542,31 +702,64 @@ def main():
             print(f"  Delta:      +{delta} controls remediated")
             print(f"{'=' * 70}")
 
+            if greenfield_result.errors or hardened_result.errors:
+                all_ok = False
+
+        # ---- DEPLOY workflow (stateless) ----
         if args.workflow in ("deploy", "all"):
-            # --- Deploy against greenfield ---
             print("\nStarting greenfield server for deploy test...")
-            greenfield_proc = start_server(port1, "greenfield")
-            client = GraphClient(f"http://localhost:{port1}")
+            proc = start_server(ports[0], "greenfield")
+            procs.append(proc)
+            client = GraphClient(f"http://localhost:{ports[0]}")
             deploy_results = deploy_remediation(client)
             print_deploy(deploy_results)
-            stop_server(greenfield_proc)
-            greenfield_proc = None
+            stop_server(proc); procs.remove(proc)
+
+            if not all(ok for _, ok, _ in deploy_results):
+                all_ok = False
+
+        # ---- STATEFUL deploy-then-assess workflow ----
+        if args.workflow in ("stateful", "all"):
+            print("\nStarting STATEFUL greenfield server...")
+            proc = start_server(ports[0], "greenfield", stateful=True)
+            procs.append(proc)
+            client = GraphClient(f"http://localhost:{ports[0]}")
+            stateful_results = deploy_then_assess(client)
+            print_results("Stateful Deploy-Then-Assess — GREENFIELD", stateful_results)
+            stop_server(proc); procs.remove(proc)
+
+            if not all(ok for _, ok, _ in stateful_results):
+                all_ok = False
+
+        # ---- FILTER workflow ----
+        if args.workflow in ("filter", "all"):
+            print("\nStarting greenfield server for filter tests...")
+            proc_g = start_server(ports[0], "greenfield")
+            procs.append(proc_g)
+            greenfield_client = GraphClient(f"http://localhost:{ports[0]}")
+
+            print("Starting hardened server for filter tests...")
+            proc_h = start_server(ports[1], "hardened")
+            procs.append(proc_h)
+            hardened_client = GraphClient(f"http://localhost:{ports[1]}")
+
+            filter_results = test_filters(greenfield_client, hardened_client)
+            print_results("OData $filter Engine Tests", filter_results)
+
+            stop_server(proc_g); procs.remove(proc_g)
+            stop_server(proc_h); procs.remove(proc_h)
+
+            if not all(ok for _, ok, _ in filter_results):
+                all_ok = False
 
     finally:
-        if greenfield_proc:
-            stop_server(greenfield_proc)
-        if hardened_proc:
-            stop_server(hardened_proc)
+        cleanup()
 
-    # Exit code
-    if args.workflow in ("assess", "all"):
-        if greenfield_result.errors or hardened_result.errors:
-            sys.exit(1)
-    if args.workflow in ("deploy", "all"):
-        if not all(ok for _, ok, _ in deploy_results):
-            sys.exit(1)
-
-    print("\nAll workflows completed successfully.")
+    if all_ok:
+        print("\nAll workflows completed successfully.")
+    else:
+        print("\nSome checks failed.")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
