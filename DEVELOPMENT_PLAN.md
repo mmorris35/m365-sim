@@ -21,17 +21,17 @@ Use the m365-sim-executor agent to execute subtask X.Y.Z
 
 **MVP Scope**:
 - [x] Phase 00 — Decision Log
-- [ ] Phase 01 — Repo Bootstrap
-- [ ] Phase 02 — Server Scaffold
-- [ ] Phase 03 — Route Table
-- [ ] Phase 04 — Greenfield Fixture Set
+- [x] Phase 01 — Repo Bootstrap
+- [x] Phase 02 — Server Scaffold
+- [x] Phase 03 — Route Table
+- [x] Phase 04 — Greenfield Fixture Set
 - [ ] Phase 05 — Smoke Tests
 - [ ] Phase 06 — Hardened Fixture Set
 - [ ] Phase 07 — GCC High Scaffold
 - [ ] Phase 08 — TenantBuilder Fluent API
 
-**Current**: Phase 01
-**Next**: 1.1.1
+**Current**: Phase 04
+**Next**: 5.1.1
 
 ---
 
@@ -703,26 +703,32 @@ git checkout -b feature/4-1-greenfield-fixtures
 ```
 
 **Deliverables**:
-- [ ] Create `scenarios/gcc-moderate/greenfield/organization.json` — Contoso Defense LLC with G5 assigned plans (exchange, MDE, SCO, AADPremium), per kickoff spec
-- [ ] Create `scenarios/gcc-moderate/greenfield/users.json` — Mike Morris (GA) + BreakGlass Admin, per kickoff spec
-- [ ] Create `scenarios/gcc-moderate/greenfield/me.json` — Mike Morris entity, per kickoff spec
-- [ ] Create `scenarios/gcc-moderate/greenfield/me_auth_methods.json` — Authenticator + password (no FIDO2), per kickoff spec
-- [ ] Create `scenarios/gcc-moderate/greenfield/domains.json` — contoso-defense.com + onmicrosoft.com, per kickoff spec
-- [ ] Create `scenarios/gcc-moderate/greenfield/groups.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/organization.json` — Contoso Defense LLC with G5 assigned plans (exchange, MDE, SCO, AADPremium), per kickoff spec
+- [x] Create `scenarios/gcc-moderate/greenfield/users.json` — Mike Morris (GA) + BreakGlass Admin, per kickoff spec
+- [x] Create `scenarios/gcc-moderate/greenfield/me.json` — Mike Morris entity, per kickoff spec
+- [x] Create `scenarios/gcc-moderate/greenfield/me_auth_methods.json` — Authenticator + password (no FIDO2), per kickoff spec
+- [x] Create `scenarios/gcc-moderate/greenfield/domains.json` — contoso-defense.com + onmicrosoft.com, per kickoff spec
+- [x] Create `scenarios/gcc-moderate/greenfield/groups.json` — empty value array
 
 All fixtures must include `@odata.context` fields matching real Graph API responses.
 
 **Success Criteria**:
-- [ ] Each JSON file is valid JSON: `python -m json.tool < file.json`
-- [ ] `organization.json` has `assignedPlans` with 4 service plans
-- [ ] `users.json` has exactly 2 users
-- [ ] `me_auth_methods.json` has Authenticator + password (no FIDO2)
-- [ ] Server starts and serves these fixtures: `python server.py` then `curl -H "Authorization: Bearer x" http://localhost:8888/v1.0/users`
+- [x] Each JSON file is valid JSON: `python -m json.tool < file.json`
+- [x] `organization.json` has `assignedPlans` with 4 service plans
+- [x] `users.json` has exactly 2 users
+- [x] `me_auth_methods.json` has Authenticator + password (no FIDO2)
+- [x] Server starts and serves these fixtures: `python server.py` then `curl -H "Authorization: Bearer x" http://localhost:8888/v1.0/users`
 
 **Git Commit**:
 ```bash
 git add -A && git commit -m "feat(fixtures): organization, users, and identity fixtures [4.1.1]"
 ```
+
+**Completion Notes**:
+- **Implementation**: Created 6 core identity and organization fixtures for fresh greenfield tenant: organization.json (Contoso Defense LLC with 4 G5 plans), users.json (Mike Morris GA + BreakGlass Admin), me.json (operator context), me_auth_methods.json (Authenticator + password, no FIDO2), domains.json (contoso-defense.com + onmicrosoft), groups.json (empty).
+- **Files Created**: 6 JSON fixtures in scenarios/gcc-moderate/greenfield/
+- **Validation**: All JSON validated with python3 -m json.tool; server tested to verify endpoint responses
+- **Notes**: Fixtures match kickoff spec exactly, including @odata.context URLs for graph.microsoft.com
 
 ---
 
@@ -732,31 +738,37 @@ git add -A && git commit -m "feat(fixtures): organization, users, and identity f
 - [x] 4.1.1: Organization, Users, and Identity Fixtures
 
 **Deliverables**:
-- [ ] Create `scenarios/gcc-moderate/greenfield/conditional_access_policies.json` — empty value array
-- [ ] Create `scenarios/gcc-moderate/greenfield/auth_methods_policy.json` — all methods disabled (fido2, microsoftAuthenticator, temporaryAccessPass, sms), per kickoff spec
-- [ ] Create `scenarios/gcc-moderate/greenfield/managed_devices.json` — empty value array
-- [ ] Create `scenarios/gcc-moderate/greenfield/compliance_policies.json` — empty value array
-- [ ] Create `scenarios/gcc-moderate/greenfield/device_configurations.json` — empty value array
-- [ ] Create `scenarios/gcc-moderate/greenfield/device_enrollment_configurations.json` — empty value array
-- [ ] Create `scenarios/gcc-moderate/greenfield/secure_scores.json` — per kickoff spec (currentScore 12.0, maxScore 198.0)
-- [ ] Create `scenarios/gcc-moderate/greenfield/audit_sign_ins.json` — one setup sign-in entry, per kickoff spec
-- [ ] Create `scenarios/gcc-moderate/greenfield/audit_directory.json` — empty value array
-- [ ] Create `scenarios/gcc-moderate/greenfield/security_incidents.json` — empty value array
-- [ ] Create `scenarios/gcc-moderate/greenfield/security_alerts.json` — empty value array
-- [ ] Create `scenarios/gcc-moderate/greenfield/information_protection_labels.json` — empty value array
-- [ ] Create `scenarios/gcc-moderate/greenfield/named_locations.json` — empty value array
-- [ ] Create `scenarios/gcc-moderate/greenfield/secure_score_control_profiles.json` — empty value array with proper `@odata.context`
+- [x] Create `scenarios/gcc-moderate/greenfield/conditional_access_policies.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/auth_methods_policy.json` — all methods disabled (fido2, microsoftAuthenticator, temporaryAccessPass, sms), per kickoff spec
+- [x] Create `scenarios/gcc-moderate/greenfield/managed_devices.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/compliance_policies.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/device_configurations.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/device_enrollment_configurations.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/secure_scores.json` — per kickoff spec (currentScore 12.0, maxScore 198.0)
+- [x] Create `scenarios/gcc-moderate/greenfield/audit_sign_ins.json` — one setup sign-in entry, per kickoff spec
+- [x] Create `scenarios/gcc-moderate/greenfield/audit_directory.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/security_incidents.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/security_alerts.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/information_protection_labels.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/named_locations.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/secure_score_control_profiles.json` — empty value array with proper `@odata.context`
 
 **Success Criteria**:
-- [ ] All 14 JSON files are valid JSON
-- [ ] `secure_scores.json` shows `currentScore: 12.0` and `maxScore: 198.0`
-- [ ] `auth_methods_policy.json` has 4 auth method configurations all with `state: "disabled"`
-- [ ] `audit_sign_ins.json` has exactly 1 sign-in entry
+- [x] All 14 JSON files are valid JSON
+- [x] `secure_scores.json` shows `currentScore: 12.0` and `maxScore: 198.0`
+- [x] `auth_methods_policy.json` has 4 auth method configurations all with `state: "disabled"`
+- [x] `audit_sign_ins.json` has exactly 1 sign-in entry
 
 **Git Commit**:
 ```bash
 git add -A && git commit -m "feat(fixtures): security, audit, and empty fixtures [4.1.2]"
 ```
+
+**Completion Notes**:
+- **Implementation**: Created 14 security, audit, and empty array fixtures representing fresh tenant state (no policies deployed, no audit activity yet): conditional_access_policies, auth_methods_policy (all disabled), managed_devices, compliance_policies, device_configurations, device_enrollment_configurations, secure_scores (current 12.0/max 198.0), audit_sign_ins (1 entry), audit_directory, security_incidents, security_alerts, information_protection_labels, named_locations, secure_score_control_profiles.
+- **Files Created**: 14 JSON fixtures in scenarios/gcc-moderate/greenfield/
+- **Validation**: All JSON validated; auth_methods_policy verified to have 4 disabled configs; secure_scores verified to match spec; audit_sign_ins verified to have exactly 1 entry
+- **Notes**: All @odata.context URLs correctly reference graph.microsoft.com/v1.0
 
 ---
 
@@ -766,47 +778,68 @@ git add -A && git commit -m "feat(fixtures): security, audit, and empty fixtures
 - [x] 4.1.2: Security, Audit, and Empty Fixtures
 
 **Deliverables**:
-- [ ] Create `scenarios/gcc-moderate/greenfield/directory_roles.json` — Global Administrator, Security Administrator, Compliance Administrator, Global Reader + other standard built-in roles (User Administrator, Exchange Administrator, SharePoint Administrator, Teams Administrator, Intune Administrator, Cloud Application Administrator, Privileged Role Administrator, Conditional Access Administrator, Security Reader, Helpdesk Administrator)
-- [ ] Create `scenarios/gcc-moderate/greenfield/directory_role_members.json` — GA role members: Mike Morris
-- [ ] Create `scenarios/gcc-moderate/greenfield/role_assignments.json` — Mike Morris assigned to Global Administrator, per kickoff spec
-- [ ] Create `scenarios/gcc-moderate/greenfield/role_definitions.json` — standard built-in role definitions with proper `roleTemplateId` values
-- [ ] Create `scenarios/gcc-moderate/greenfield/role_eligibility_schedules.json` — empty value array
-- [ ] Create `scenarios/gcc-moderate/greenfield/role_assignment_schedules.json` — empty value array
-- [ ] Create `scenarios/gcc-moderate/greenfield/applications.json` — empty value array (no custom apps on fresh tenant)
-- [ ] Create `scenarios/gcc-moderate/greenfield/service_principals.json` — Microsoft Graph SP (`appId: "00000003-0000-0000-c000-000000000000"`) plus common pre-populated SPs (Office 365 Exchange Online, SharePoint Online, Microsoft Teams, Windows Azure Active Directory)
-- [ ] Create `scenarios/gcc-moderate/greenfield/devices.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/directory_roles.json` — Global Administrator, Security Administrator, Compliance Administrator, Global Reader + other standard built-in roles (User Administrator, Exchange Administrator, SharePoint Administrator, Teams Administrator, Intune Administrator, Cloud Application Administrator, Privileged Role Administrator, Conditional Access Administrator, Security Reader, Helpdesk Administrator)
+- [x] Create `scenarios/gcc-moderate/greenfield/directory_role_members.json` — GA role members: Mike Morris
+- [x] Create `scenarios/gcc-moderate/greenfield/role_assignments.json` — Mike Morris assigned to Global Administrator, per kickoff spec
+- [x] Create `scenarios/gcc-moderate/greenfield/role_definitions.json` — standard built-in role definitions with proper `roleTemplateId` values
+- [x] Create `scenarios/gcc-moderate/greenfield/role_eligibility_schedules.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/role_assignment_schedules.json` — empty value array
+- [x] Create `scenarios/gcc-moderate/greenfield/applications.json` — empty value array (no custom apps on fresh tenant)
+- [x] Create `scenarios/gcc-moderate/greenfield/service_principals.json` — Microsoft Graph SP (`appId: "00000003-0000-0000-c000-000000000000"`) plus common pre-populated SPs (Office 365 Exchange Online, SharePoint Online, Microsoft Teams, Windows Azure Active Directory)
+- [x] Create `scenarios/gcc-moderate/greenfield/devices.json` — empty value array
 
 **Success Criteria**:
-- [ ] `directory_roles.json` has at least 10 built-in roles
-- [ ] `role_assignments.json` assigns Mike Morris to Global Administrator role
-- [ ] `service_principals.json` includes Microsoft Graph SP with correct appId
-- [ ] Server starts and all endpoints return data: quick smoke test hitting each new endpoint
+- [x] `directory_roles.json` has at least 10 built-in roles
+- [x] `role_assignments.json` assigns Mike Morris to Global Administrator role
+- [x] `service_principals.json` includes Microsoft Graph SP with correct appId
+- [x] Server starts and all endpoints return data: quick smoke test hitting each new endpoint
 
 **Git Commit**:
 ```bash
 git add -A && git commit -m "feat(fixtures): roles, applications, and service principals [4.1.3]"
 ```
 
+**Completion Notes**:
+- **Implementation**: Created 9 role and application fixtures: directory_roles (14 built-in roles including GA, Security Admin, Compliance Admin, Global Reader, User Admin, Exchange Admin, SharePoint Admin, Teams Admin, Intune Admin, Cloud App Admin, Privileged Role Admin, Conditional Access Admin, Security Reader, Helpdesk Admin), directory_role_members (GA role members: Mike Morris), role_assignments (Mike Morris assigned to Global Administrator), role_definitions (matching roles with roleTemplateIds), role_eligibility_schedules (empty), role_assignment_schedules (empty), applications (empty), service_principals (9 SPs including Microsoft Graph with correct appId), devices (empty).
+- **Files Created**: 9 JSON fixtures in scenarios/gcc-moderate/greenfield/
+- **Validation**: directory_roles verified to have 14 roles; service_principals verified to include Microsoft Graph SP; role_assignments verified to assign Mike Morris to GA role; all JSON validated
+- **Notes**: Service principals include Microsoft Graph (00000003-0000-0000-c000-000000000000) plus 8 common pre-populated SPs (Exchange, SharePoint, Teams, etc.)
+
 ---
 
 ### Task 4.1 Complete — Squash Merge
-- [ ] All subtasks complete (4.1.1 through 4.1.3)
-- [ ] All ~27 fixture files created in `scenarios/gcc-moderate/greenfield/`
-- [ ] `ls scenarios/gcc-moderate/greenfield/*.json | wc -l` shows correct count
-- [ ] All tests pass: `pytest tests/ -v`
-- [ ] Push feature branch: `git push -u origin feature/4-1-greenfield-fixtures`
-- [ ] Squash merge to main:
+- [x] All subtasks complete (4.1.1 through 4.1.3)
+- [x] All 29 fixture files created in `scenarios/gcc-moderate/greenfield/`
+- [x] `ls scenarios/gcc-moderate/greenfield/*.json | wc -l` shows 29 files
+- [x] All tests pass: `pytest tests/ -v` (no tests yet — Phase 05 deliverable)
+- [x] Push feature branch: `git push -u origin feature/4-1-greenfield-fixtures`
+- [x] Squash merge to main:
   ```bash
   git checkout main && git pull origin main
   git merge --squash feature/4-1-greenfield-fixtures
   git commit -m "feat: complete greenfield GCC Moderate fixture set"
   git push origin main
   ```
-- [ ] Clean up:
+- [x] Clean up:
   ```bash
   git branch -d feature/4-1-greenfield-fixtures
   git push origin --delete feature/4-1-greenfield-fixtures
   ```
+
+**Task 4.1 Summary**:
+- 29 total fixture files created and validated
+- All 3 subtasks completed (4.1.1, 4.1.2, 4.1.3) with dedicated commits
+- Server.py fixture loading bug fixed to properly serve all endpoints
+- All success criteria verified:
+  - organization.json: 4 assignedPlans (exchange, MicrosoftDefenderATP, SCO, AADPremiumService)
+  - users.json: 2 users (Mike Morris GA + BreakGlass Admin)
+  - directory_roles.json: 14 built-in roles
+  - service_principals.json: 9 SPs including Microsoft Graph (00000003-0000-0000-c000-000000000000)
+  - secure_scores.json: currentScore 12.0, maxScore 198.0
+  - auth_methods_policy.json: all 4 methods disabled
+  - Comprehensive smoke test: all key endpoints returning correct data
+- Merged to main via squash merge commit: 1db341b
+- Branch cleaned up
 
 ---
 
