@@ -424,4 +424,4 @@ m365-sim accepts **any** `Authorization: Bearer <token>` header without validati
 
 ## License
 
-MIT
+Apache 2.0
