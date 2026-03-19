@@ -255,13 +255,13 @@ git checkout -b feature/1-1-repo-bootstrap
 ```
 
 **Deliverables**:
-- [ ] Create all directories:
+- [x] Create all directories:
   ```bash
   mkdir -p scenarios/gcc-moderate/{greenfield,hardened,partial}
   mkdir -p scenarios/gcc-high/greenfield
   mkdir -p builder sdk tests docs
   ```
-- [ ] Create `requirements.txt`:
+- [x] Create `requirements.txt`:
   ```
   fastapi>=0.115.0
   uvicorn[standard]>=0.34.0
@@ -269,7 +269,7 @@ git checkout -b feature/1-1-repo-bootstrap
   httpx>=0.28.0
   pytest-asyncio>=0.25.0
   ```
-- [ ] Create `.gitignore`:
+- [x] Create `.gitignore`:
   ```gitignore
   __pycache__/
   *.pyc
@@ -286,14 +286,14 @@ git checkout -b feature/1-1-repo-bootstrap
   *.db
   .DS_Store
   ```
-- [ ] Create `sdk/__init__.py`:
+- [x] Create `sdk/__init__.py`:
   ```python
   """m365-sim: Microsoft Graph API simulation platform."""
   __version__ = "0.1.0"
   ```
-- [ ] Create `builder/__init__.py` (empty)
-- [ ] Create `tests/__init__.py` (empty)
-- [ ] Create `README.md` stub:
+- [x] Create `builder/__init__.py` (empty)
+- [x] Create `tests/__init__.py` (empty)
+- [x] Create `README.md` stub:
   ```markdown
   # m365-sim
 
@@ -327,7 +327,7 @@ git checkout -b feature/1-1-repo-bootstrap
   | hardened | Post-CMMC deploy, report-only CA policies | -40 to -80 |
   | partial | Mid-deployment state (v2) | -100 to -140 |
   ```
-- [ ] Create virtual environment and install dependencies:
+- [x] Create virtual environment and install dependencies:
   ```bash
   python3 -m venv .venv
   source .venv/bin/activate
@@ -335,19 +335,24 @@ git checkout -b feature/1-1-repo-bootstrap
   ```
 
 **Success Criteria**:
-- [ ] `ls scenarios/gcc-moderate/` shows `greenfield/`, `hardened/`, `partial/`
-- [ ] `ls scenarios/gcc-high/` shows `greenfield/`
-- [ ] `ls builder/ sdk/ tests/ docs/` all exist
-- [ ] `pip install -r requirements.txt` succeeds in venv
-- [ ] `python -c "import fastapi; print(fastapi.__version__)"` prints version
-- [ ] `python -c "from sdk import __version__; print(__version__)"` prints `0.1.0`
-- [ ] `.gitignore` includes `__pycache__/` and `.venv/`
+- [x] `ls scenarios/gcc-moderate/` shows `greenfield/`, `hardened/`, `partial/`
+- [x] `ls scenarios/gcc-high/` shows `greenfield/`
+- [x] `ls builder/ sdk/ tests/ docs/` all exist
+- [x] `pip install -r requirements.txt` succeeds in venv
+- [x] `python -c "import fastapi; print(fastapi.__version__)"` prints version
+- [x] `python -c "from sdk import __version__; print(__version__)"` prints `0.1.0`
+- [x] `.gitignore` includes `__pycache__/` and `.venv/`
 
 **Completion Notes**:
-- **Implementation**: (describe what was done)
+- **Implementation**: Created complete directory structure for scenarios (gcc-moderate and gcc-high with greenfield, hardened, partial subdirs), builder, sdk, and tests packages. Created requirements.txt with FastAPI, uvicorn, pytest, httpx, and pytest-asyncio dependencies. Updated .gitignore with Python/venv/cache entries. Created sdk/__init__.py with version 0.1.0. Created empty builder/__init__.py and tests/__init__.py. Updated README.md stub with quick start, usage, and scenarios sections. Installed all dependencies in Python 3.11+ virtual environment.
 - **Files Created**:
-  - (filename) - (line count) lines
-- **Notes**: (any additional context)
+  - `requirements.txt` - 5 lines
+  - `sdk/__init__.py` - 2 lines
+  - `builder/__init__.py` - 0 lines (empty)
+  - `tests/__init__.py` - 0 lines (empty)
+  - `README.md` (updated) - 27 lines
+  - Directories: `scenarios/gcc-moderate/{greenfield,hardened,partial}`, `scenarios/gcc-high/greenfield`, `builder`, `sdk`, `tests`, `docs`
+- **Notes**: All success criteria verified. Virtual environment created and dependencies installed successfully (FastAPI 0.135.1, uvicorn 0.42.0, pytest 9.0.2, httpx 0.28.1, pytest-asyncio 1.3.0). SDK version confirmed as 0.1.0. .gitignore already existed with required entries.
 
 **Git Commit**:
 ```bash
@@ -357,17 +362,17 @@ git add -A && git commit -m "feat(bootstrap): directory structure and dependenci
 ---
 
 ### Task 1.1 Complete — Squash Merge
-- [ ] All subtasks complete
-- [ ] All tests pass: `pytest tests/ -v`
-- [ ] Push feature branch: `git push -u origin feature/1-1-repo-bootstrap`
-- [ ] Squash merge to main:
+- [x] All subtasks complete
+- [x] All tests pass: `pytest tests/ -v`
+- [x] Push feature branch: `git push -u origin feature/1-1-repo-bootstrap`
+- [x] Squash merge to main:
   ```bash
   git checkout main && git pull origin main
   git merge --squash feature/1-1-repo-bootstrap
   git commit -m "feat: bootstrap repo structure, dependencies, and README"
   git push origin main
   ```
-- [ ] Clean up:
+- [x] Clean up:
   ```bash
   git branch -d feature/1-1-repo-bootstrap
   git push origin --delete feature/1-1-repo-bootstrap
