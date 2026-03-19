@@ -29,9 +29,11 @@ Use the m365-sim-executor agent to execute subtask X.Y.Z
 - [x] Phase 06 — Hardened Fixture Set
 - [ ] Phase 07 — GCC High Scaffold
 - [x] Phase 08 — TenantBuilder Fluent API
+- [ ] Phase 09 — Stateful Write Operations
+- [ ] Phase 10 — Minimal $filter Engine
 
-**Current**: Phase 08 Complete
-**Status**: MVP features mostly complete; Phases 05 and 07 remain for completion
+**Current**: Phase 09
+**Next**: 9.1.1
 
 ---
 
@@ -1354,9 +1356,241 @@ git add -A && git commit -m "test(builder): TenantBuilder tests [8.1.2]"
 
 ---
 
+## Phase 09: Stateful Write Operations
+
+**Goal**: POST/PATCH operations mutate in-memory fixture state so subsequent GETs reflect changes. Enables deploy-then-verify test flows in a single server run.
+**Duration**: 1-2 sessions
+
+### Task 9.1: Stateful Write Engine
+
+**Git**: Create branch `feature/9-1-stateful-writes` when starting first subtask.
+
+**Subtask 9.1.1: In-Memory State Mutation and Reset (Single Session)**
+
+**Prerequisites**:
+- [x] 8.1.2: TenantBuilder Tests
+
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/9-1-stateful-writes
+```
+
+**Deliverables**:
+- [ ] Modify `server.py` to support stateful write mode:
+  - Add `--stateful` CLI flag (default: False, preserving current stateless behavior)
+  - When `--stateful` is enabled:
+    - `POST /v1.0/identity/conditionalAccess/policies` adds the policy (with generated `id` and `createdDateTime`) to the in-memory `conditional_access_policies` fixture's `value` array
+    - `PATCH /v1.0/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/{method_id}` updates the matching config in the in-memory `auth_methods_policy` fixture
+    - `POST /v1.0/deviceManagement/deviceCompliancePolicies` adds to `compliance_policies` fixture's `value` array
+    - `POST /v1.0/deviceManagement/deviceConfigurations` adds to `device_configurations` fixture's `value` array
+  - Subsequent GETs return mutated state
+  - When `--stateful` is disabled (default), behavior is unchanged from current implementation
+- [ ] Add `POST /v1.0/_reset` endpoint (only available when `--stateful`):
+  - Reloads all fixtures from disk, resetting in-memory state to original
+  - Returns `{"status": "reset", "fixtures_loaded": N}`
+  - Logs the reset operation
+- [ ] Deep-copy fixtures at startup so reset restores clean state (use `copy.deepcopy` on loaded fixtures to create the baseline)
+
+**Key Implementation Notes**:
+- Store baseline fixtures in `app.state.baseline_fixtures` (deep copy at startup)
+- `app.state.fixtures` becomes the mutable working copy
+- Reset copies baseline back to working fixtures
+- `--stateful` flag stored in `app.state.stateful` for route handlers to check
+- Write handlers must shallow-copy the response body before inserting into fixtures to avoid reference issues
+- PATCH for auth methods: find the config by `id` in `authenticationMethodConfigurations` array, merge request body fields into it
+
+**Success Criteria**:
+- [ ] `python server.py --stateful` starts server in stateful mode
+- [ ] `python server.py` (no flag) preserves current stateless behavior — all existing tests pass unchanged
+- [ ] In stateful mode: POST a CA policy, then GET policies returns it
+- [ ] In stateful mode: PATCH fido2 to enabled, then GET auth methods policy shows fido2 enabled
+- [ ] In stateful mode: POST /_reset restores original fixture state
+- [ ] In stateful mode: POST a CA policy, POST /_reset, GET policies returns empty (original state)
+- [ ] No TODO/FIXME in server.py
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(stateful): in-memory state mutation with --stateful flag and reset endpoint [9.1.1]"
+```
+
+---
+
+**Subtask 9.1.2: Stateful Write Tests (Single Session)**
+
+**Prerequisites**:
+- [x] 9.1.1: In-Memory State Mutation and Reset
+
+**Deliverables**:
+- [ ] Create `tests/test_stateful.py` with:
+  - Separate `mock_server_stateful` fixture that starts server with `--stateful`
+  - `test_post_ca_policy_then_get` — POST a CA policy, GET policies, verify the new policy appears in the response
+  - `test_post_multiple_ca_policies` — POST 3 policies, GET returns all 3 (plus any originals)
+  - `test_patch_auth_method_then_get` — PATCH fido2 to enabled, GET auth methods policy, verify fido2 is now enabled
+  - `test_patch_auth_method_preserves_others` — PATCH fido2, verify other methods unchanged
+  - `test_post_compliance_policy_then_get` — POST compliance policy, GET returns it
+  - `test_post_device_config_then_get` — POST device config, GET returns it
+  - `test_reset_clears_mutations` — POST policies, POST /_reset, GET returns original empty state
+  - `test_reset_returns_fixture_count` — POST /_reset returns fixture count in response
+  - `test_stateless_mode_unchanged` — existing `mock_server` (no --stateful) still returns stateless behavior (POST then GET shows no change)
+  - `test_deploy_then_assess_flow` — full workflow: POST 3 CA policies + PATCH 2 auth methods, then GET all endpoints and verify the mutations are visible (this is the key deploy-then-verify test)
+- [ ] All existing tests in test_server.py, test_query_write_error.py, test_hardened.py still pass (they use stateless mode)
+
+**Success Criteria**:
+- [ ] `pytest tests/test_stateful.py -v` all green
+- [ ] At least 10 stateful-specific tests
+- [ ] `pytest tests/ -v` — ALL tests pass (stateful + existing stateless)
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(stateful): deploy-then-verify and reset tests [9.1.2]"
+```
+
+---
+
+### Task 9.1 Complete — Squash Merge
+- [ ] All subtasks complete (9.1.1 and 9.1.2)
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/9-1-stateful-writes`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/9-1-stateful-writes
+  git commit -m "feat: stateful write operations with --stateful flag and /_reset endpoint"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/9-1-stateful-writes
+  git push origin --delete feature/9-1-stateful-writes
+  ```
+
+---
+
+## Phase 10: Minimal $filter Engine
+
+**Goal**: Parse OData `$filter` expressions with `eq` operator on known fields and filter the `value` array in fixture responses. Makes the mock realistic enough to catch filter-dependent bugs in consumers.
+**Duration**: 1 session
+
+### Task 10.1: Filter Engine
+
+**Git**: Create branch `feature/10-1-filter-engine` when starting first subtask.
+
+**Subtask 10.1.1: OData $filter Parser and Evaluator (Single Session)**
+
+**Prerequisites**:
+- [x] 9.1.2: Stateful Write Tests
+
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/10-1-filter-engine
+```
+
+**Deliverables**:
+- [ ] Add a `filter_engine` module or section in `server.py` that:
+  - Parses simple OData `$filter` expressions supporting:
+    - `eq` operator: `field eq 'value'` or `field eq value` (string/bool/int)
+    - `and` combinator: `field1 eq 'val1' and field2 eq 'val2'`
+    - `or` combinator: `field1 eq 'val1' or field2 eq 'val2'`
+    - Nested field access via `/`: `grantControls/builtInControls eq 'mfa'` — only needed for shallow paths
+  - Evaluates the parsed filter against each item in the `value` array
+  - Returns only items that match the filter
+  - Gracefully handles unparseable filters: log a warning and return the full unfiltered result (don't break)
+- [ ] Update `get_fixture()` to apply `$filter` when present instead of just logging it
+- [ ] Keep logging: `logger.info(f"Applying $filter: {filter_expr}")` when a filter is applied
+- [ ] Log a warning for unsupported filter syntax: `logger.warning(f"Unsupported $filter syntax, returning unfiltered: {filter_expr}")`
+- [ ] Common filter patterns that MUST work:
+  - `$filter=userType eq 'Guest'` on `/v1.0/users`
+  - `$filter=userType eq 'Member'` on `/v1.0/users`
+  - `$filter=accountEnabled eq true` on `/v1.0/users`
+  - `$filter=securityEnabled eq true` on `/v1.0/groups`
+  - `$filter=appId eq '00000003-0000-0000-c000-000000000000'` on `/v1.0/servicePrincipals`
+  - `$filter=state eq 'enabledForReportingButNotEnforced'` on `/v1.0/identity/conditionalAccess/policies`
+  - `$filter=complianceState eq 'compliant'` on `/v1.0/deviceManagement/managedDevices`
+  - `$filter=userType eq 'Guest' and accountEnabled eq true` (compound filter)
+
+**Implementation Notes**:
+- Keep it simple: regex-based parser, not a full OData grammar
+- Pattern: `(\w+(?:/\w+)*)\s+eq\s+(?:'([^']*)'|(\w+))` captures field, string value, or bare value
+- Boolean values: `true`/`false` (bare, no quotes) — compare as Python bool
+- Integer values: bare digits — compare as int
+- String values: single-quoted — compare as str
+- The `or {}` pattern from CLAUDE.md applies: use `(item.get(field) or default)` for nested access
+
+**Success Criteria**:
+- [ ] `$filter=userType eq 'Member'` on `/v1.0/users` returns only Member users
+- [ ] `$filter=userType eq 'Guest'` on `/v1.0/users` returns empty array (no guests in greenfield)
+- [ ] `$filter=appId eq '00000003-0000-0000-c000-000000000000'` on `/v1.0/servicePrincipals` returns only the Microsoft Graph SP
+- [ ] `$filter=state eq 'enabledForReportingButNotEnforced'` on hardened CA policies returns all 8
+- [ ] `$filter=complianceState eq 'compliant'` on hardened managed devices returns all 3
+- [ ] Compound filter: `$filter=userType eq 'Member' and accountEnabled eq true` works
+- [ ] Unparseable filter returns full result with warning log (no error)
+- [ ] `$top` still works in combination with `$filter` (`$filter` applied first, then `$top` truncates)
+- [ ] No TODO/FIXME in server.py
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(filter): minimal OData $filter engine with eq/and/or support [10.1.1]"
+```
+
+---
+
+**Subtask 10.1.2: Filter Engine Tests (Single Session)**
+
+**Prerequisites**:
+- [x] 10.1.1: OData $filter Parser and Evaluator
+
+**Deliverables**:
+- [ ] Create `tests/test_filter.py` with (uses `mock_server` and `auth_headers` from conftest.py):
+  - `test_filter_users_by_member_type` — `$filter=userType eq 'Member'` returns 2 members
+  - `test_filter_users_by_guest_type` — `$filter=userType eq 'Guest'` returns empty array
+  - `test_filter_users_account_enabled` — `$filter=accountEnabled eq true` filters correctly
+  - `test_filter_service_principals_by_app_id` — `$filter=appId eq '00000003-0000-0000-c000-000000000000'` returns exactly 1 SP
+  - `test_filter_with_top` — `$filter=userType eq 'Member'&$top=1` returns 1 result
+  - `test_filter_compound_and` — `$filter=userType eq 'Member' and accountEnabled eq true` works
+  - `test_filter_unparseable_returns_full` — `$filter=badSyntax!!!` returns full result (graceful degradation)
+  - `test_filter_empty_collection` — filter on empty collection returns empty
+  - `test_filter_no_match` — filter that matches nothing returns empty `value`
+- [ ] Create hardened filter tests (uses `mock_server_hardened` from test_hardened.py or new fixture):
+  - `test_filter_hardened_ca_policies_by_state` — `$filter=state eq 'enabledForReportingButNotEnforced'` returns 8 policies
+  - `test_filter_hardened_compliant_devices` — `$filter=complianceState eq 'compliant'` returns 3 devices
+
+**Success Criteria**:
+- [ ] `pytest tests/test_filter.py -v` all green
+- [ ] At least 10 filter-specific tests
+- [ ] `pytest tests/ -v` — ALL tests pass (filter + stateful + existing)
+- [ ] No TODO/FIXME in test files
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(filter): OData $filter engine tests [10.1.2]"
+```
+
+---
+
+### Task 10.1 Complete — Squash Merge
+- [ ] All subtasks complete (10.1.1 and 10.1.2)
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/10-1-filter-engine`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/10-1-filter-engine
+  git commit -m "feat: minimal OData $filter engine with eq/and/or support"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/10-1-filter-engine
+  git push origin --delete feature/10-1-filter-engine
+  ```
+
+---
+
 ## v2 Roadmap (Post-MVP)
 
-The following features are planned for v2, after MVP is complete and stable.
+The following features are planned for v2, after MVP and extensions are complete.
 
 ### v2.1: OSCAL Component Definition Generation
 **Status**: Deferred — implement after MVP
@@ -1370,14 +1604,8 @@ The following features are planned for v2, after MVP is complete and stable.
 ### v2.4: Hot-Reload Fixtures
 **Status**: Deferred — reload fixture files without server restart
 
-### v2.5: Stateful Write Operations
-**Status**: Deferred — writes mutate in-memory state for deploy-then-verify flows
-
 ### v2.6: Docker Packaging
 **Status**: Deferred — container image for CI environments
-
-### v2.7: Integration Test Harness
-**Status**: Deferred — pytest fixture that runs a compliance assessment binary against mock server, asserts SPRS score ranges (greenfield -170 to -210, hardened -40 to -80)
 
 ---
 
