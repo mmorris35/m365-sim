@@ -1973,17 +1973,26 @@ git add -A && git commit -m "feat(reload): hot-reload endpoint and --watch file 
 - [x] 13.1.1: Fixture Reload Endpoint
 
 **Deliverables**:
-- [ ] Create `tests/test_reload.py` with:
-  - `test_reload_endpoint` — POST /_reload returns 200 with fixture count and scenario
-  - `test_reload_picks_up_changes` — modify a fixture file on disk (add a user to users.json), POST /_reload, GET /v1.0/users returns the new data, then restore original file
-  - `test_reload_health_shows_watch_false` — `/health` returns `watch: false` by default
-  - `test_reload_does_not_break_existing_fixtures` — POST /_reload, verify all endpoints still work
-- [ ] All existing tests still pass
+- [x] Create `tests/test_reload.py` with:
+  - [x] `test_reload_endpoint_returns_200` — POST /_reload returns 200 with fixture count and scenario
+  - [x] `test_reload_picks_up_changes` — modify a fixture file on disk (add a user to users.json), POST /_reload, GET /v1.0/users returns the new data, then restore original file
+  - [x] `test_health_shows_watch_false_by_default` — `/health` returns `watch: false` by default
+  - [x] `test_reload_does_not_break_existing_fixtures` — POST /_reload, verify all endpoints still work
+- [x] All existing tests still pass
 
 **Success Criteria**:
-- [ ] `pytest tests/test_reload.py -v` all green
-- [ ] At least 4 reload tests
-- [ ] `pytest tests/ -v` — ALL tests pass
+- [x] `pytest tests/test_reload.py -v` all green
+- [x] At least 4 reload tests
+- [x] `pytest tests/ -v` — ALL tests pass
+
+**Completion Notes**:
+- **Implementation**: Created test_reload.py with 4 comprehensive tests using session-scoped mock_server fixture and custom temp_scenario_server fixture. Tests verify endpoint functionality, fixture file reloading, health endpoint watch status, and endpoint stability after reload. Updated conftest.py to dynamically find git root instead of hardcoded path.
+- **Files Created**:
+  - `tests/test_reload.py` - 177 lines with TestReloadEndpoint class and 4 test methods
+- **Files Modified**:
+  - `tests/conftest.py` - added Path import, updated mock_server to dynamically find git root
+- **Tests**: All 4 reload tests passing + 101 existing tests = 105 total tests passing
+- **Notes**: temp_scenario_server fixture properly copies server.py to temp directory to allow fixture file manipulation. Tests validate actual HTTP behavior without mocking.
 
 **Git Commit**:
 ```bash
@@ -1993,17 +2002,17 @@ git add -A && git commit -m "test(reload): hot-reload endpoint tests [13.1.2]"
 ---
 
 ### Task 13.1 Complete — Squash Merge
-- [ ] All subtasks complete (13.1.1 and 13.1.2)
-- [ ] All tests pass: `pytest tests/ -v`
-- [ ] Push feature branch: `git push -u origin feature/13-1-hot-reload`
-- [ ] Squash merge to main:
+- [x] All subtasks complete (13.1.1 and 13.1.2)
+- [x] All tests pass: `pytest tests/ -v`
+- [x] Push feature branch: `git push -u origin feature/13-1-hot-reload`
+- [x] Squash merge to main:
   ```bash
   git checkout main && git pull origin main
   git merge --squash feature/13-1-hot-reload
   git commit -m "feat: hot-reload fixtures with /_reload endpoint and --watch file watcher"
   git push origin main
   ```
-- [ ] Clean up:
+- [x] Clean up:
   ```bash
   git branch -d feature/13-1-hot-reload
   git push origin --delete feature/13-1-hot-reload
