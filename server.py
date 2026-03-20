@@ -660,7 +660,8 @@ def get_fixture(name: str, request: Request, top: int | None = None) -> JSONResp
     if "$select" in request.query_params:
         logger.info(f"Ignoring query param $select={request.query_params.get('$select')}")
 
-    # Apply $top truncation (after filter is applied)
+    # Apply $top truncation (after filter is applied).
+    # Negative $top values are silently ignored (returns full result set).
     if top is not None and top >= 0 and "value" in result:
         result["value"] = result["value"][:top]
 
