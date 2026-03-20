@@ -1,0 +1,24 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#deviceManagement/deviceCompliancePolicies",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000401",
+      "@odata.type": "#microsoft.graph.windowsCompliancePolicy",
+      "displayName": "CMMC-Windows-Compliance",
+      "description": "CMMC 2.0 Level 2 compliance policy for Windows devices",
+      "createdDateTime": "2024-01-05T08:00:00Z",
+      "lastModifiedDateTime": "2024-01-05T08:00:00Z",
+      "passwordRequired": true,
+      "passwordMinimumLength": 14,
+      "passwordRequiredType": "alphanumeric",
+      "passwordMinutesOfInactivityBeforeLock": 15,
+      "passwordExpirationDays": 90,
+      "passwordPreviousPasswordBlockCount": 24,
+      "requireHealthyDeviceReport": true,
+      "osMinimumVersion": "10.0.19041.0",
+      "encryptionRequired": true,
+      "storageRequireEncryption": true,
+      "firewallRequired": true
+    }
+  ]
+}

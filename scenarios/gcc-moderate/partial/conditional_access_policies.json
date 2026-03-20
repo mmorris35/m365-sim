@@ -1,0 +1,100 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#identity/conditionalAccess/policies",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000101",
+      "displayName": "CMMC-MFA-AllUsers",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "users": {
+          "includeUsers": [
+            "All"
+          ],
+          "excludeUsers": [
+            "00000000-0000-0000-0000-000000000011"
+          ]
+        }
+      },
+      "grantControls": {
+        "operator": "AND",
+        "builtInControls": [
+          "mfa"
+        ]
+      },
+      "sessionControls": {
+        "signInFrequency": {
+          "value": 0,
+          "type": "days",
+          "isEnabled": false
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000102",
+      "displayName": "CMMC-MFA-Admins",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "users": {
+          "includeRoles": [
+            "62e90394-69f5-4237-9190-012177145e10",
+            "194ae4cb-b126-40b2-bd5b-6091b380977d"
+          ],
+          "excludeUsers": [
+            "00000000-0000-0000-0000-000000000011"
+          ]
+        }
+      },
+      "grantControls": {
+        "operator": "AND",
+        "builtInControls": [
+          "mfa"
+        ],
+        "customAuthenticationFactors": [
+          "RequirePhishingResistantMFA"
+        ]
+      },
+      "sessionControls": null
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000103",
+      "displayName": "CMMC-Block-Legacy-Auth",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "users": {
+          "includeUsers": [
+            "All"
+          ],
+          "excludeUsers": [
+            "00000000-0000-0000-0000-000000000011"
+          ]
+        },
+        "clientAppTypes": [
+          "exchangeActiveSync",
+          "other"
+        ]
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": [
+          "block"
+        ]
+      },
+      "sessionControls": null
+    }
+  ]
+}
