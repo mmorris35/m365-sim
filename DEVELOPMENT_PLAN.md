@@ -31,9 +31,9 @@ Use the m365-sim-executor agent to execute subtask X.Y.Z
 - [x] Phase 08 — TenantBuilder Fluent API
 - [x] Phase 09 — Stateful Write Operations
 - [x] Phase 10 — Minimal $filter Engine
-- [ ] Phase 11 — Partial Scenario
-- [ ] Phase 12 — Commercial E5 Cloud Target
-- [ ] Phase 13 — Hot-Reload Fixtures
+- [x] Phase 11 — Partial Scenario
+- [x] Phase 12 — Commercial E5 Cloud Target
+- [x] Phase 13 — Hot-Reload Fixtures
 - [ ] Phase 14 — Docker Packaging
 - [ ] Phase 15 — OSCAL Component Definition
 
