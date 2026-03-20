@@ -42,6 +42,9 @@ EXPAND_MAP: dict[str, dict[str, str | None]] = {
         "memberOf": "groups",
         "authentication": "me_auth_methods",
     },
+    "me": {
+        "authentication": "me_auth_methods",
+    },
     "directory_roles": {
         "members": "directory_role_members",
     },
@@ -533,21 +536,9 @@ def _apply_expand(data: dict, expand_expr: str, fixtures: dict[str, dict], fixtu
     # Determine fixture type - try to match against EXPAND_MAP
     fixture_type = None
 
-    # First, try using the provided fixture_name
+    # Use fixture_name to look up expand relations directly
     if fixture_name in EXPAND_MAP:
         fixture_type = fixture_name
-    else:
-        # Infer from context - check which fixture type this could be
-        for potential_type in EXPAND_MAP.keys():
-            if potential_type == "users" and is_collection:
-                fixture_type = "users"
-                break
-            elif potential_type == "directory_roles" and is_collection:
-                fixture_type = "directory_roles"
-                break
-            elif potential_type == "organization" and not is_collection:
-                fixture_type = "organization"
-                break
 
     if fixture_type is None or fixture_type not in EXPAND_MAP:
         logger.warning(f"Could not determine fixture type for $expand")
@@ -942,7 +933,10 @@ async def get_info_protection_labels(request: Request):
 @app.post("/v1.0/identity/conditionalAccess/policies")
 async def post_ca_policy(request: Request):
     """POST /v1.0/identity/conditionalAccess/policies — return request body with added id and createdDateTime."""
-    body = await request.json()
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
     body["id"] = str(uuid.uuid4())
     body["createdDateTime"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
@@ -963,7 +957,10 @@ async def post_ca_policy(request: Request):
 async def patch_auth_method_config(method_id: str, request: Request):
     """PATCH /v1.0/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/{method_id}
     — return request body unchanged."""
-    body = await request.json()
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
 
     logger.info(f"WRITE: PATCH /v1.0/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/{method_id} — updated config")
 
@@ -985,7 +982,10 @@ async def patch_auth_method_config(method_id: str, request: Request):
 @app.post("/v1.0/deviceManagement/deviceCompliancePolicies")
 async def post_compliance_policy(request: Request):
     """POST /v1.0/deviceManagement/deviceCompliancePolicies — return request body with added id and createdDateTime."""
-    body = await request.json()
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
     body["id"] = str(uuid.uuid4())
     body["createdDateTime"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
@@ -1005,7 +1005,10 @@ async def post_compliance_policy(request: Request):
 @app.post("/v1.0/deviceManagement/deviceConfigurations")
 async def post_device_configuration(request: Request):
     """POST /v1.0/deviceManagement/deviceConfigurations — return request body with added id and createdDateTime."""
-    body = await request.json()
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
     body["id"] = str(uuid.uuid4())
     body["createdDateTime"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 

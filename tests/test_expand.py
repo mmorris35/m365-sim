@@ -40,11 +40,7 @@ class TestExpandBasics:
             assert len(user["memberOf"]) == 0
 
     def test_expand_me_authentication(self, mock_server, auth_headers):
-        """GET /me?$expand=authentication returns authentication if supported.
-
-        Note: The /me endpoint is a singleton, not in EXPAND_MAP by default.
-        This test checks the behavior - either it returns expanded or unmodified.
-        """
+        """GET /me?$expand=authentication returns me with authentication property."""
         response = httpx.get(
             f"{mock_server}/v1.0/me?$expand=authentication",
             headers=auth_headers,
@@ -53,11 +49,12 @@ class TestExpandBasics:
         data = response.json()
 
         # me endpoint returns singleton (no value key)
-        assert "displayName" in data  # Standard me fields
-        # The data should be returned - either expanded or not
-        # The fixture will include authentication if the expand was processed
-        # or be the standard me fixture if not
-        assert "id" in data  # Me always has an id
+        assert "displayName" in data
+        assert "id" in data
+        # authentication must be expanded from me_auth_methods fixture
+        assert "authentication" in data
+        assert isinstance(data["authentication"], list)
+        assert len(data["authentication"]) > 0
 
     def test_expand_directory_roles_members(self, mock_server, auth_headers):
         """GET /directoryRoles?$expand=members adds members property to each role."""
