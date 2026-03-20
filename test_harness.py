@@ -5,15 +5,17 @@ m365-sim Test Harness — Graph API Client Simulator
 Simulates a CMMC compliance assessment tool making real Microsoft Graph API
 calls against the mock server. Tests nine workflows:
 
-1. ASSESS           — greenfield + hardened tenant posture
-2. DEPLOY           — stateless write operations + error sim
-3. STATEFUL         — deploy-then-assess with _reset
-4. FILTER           — OData $filter engine (eq, compound, etc.)
-5. CLOUD            — GCC High + Commercial E5 cloud targets
-6. MOCK-CLOUD       — X-Mock-Cloud header override
-7. EXTENDED-FILTER  — ne, gt, lt, ge, le, startswith, contains, or
-8. PARTIAL          — mid-deployment scenario posture
-9. AUTH             — Bearer-only enforcement + error sim edge cases
+1.  ASSESS            — greenfield + hardened tenant posture
+2.  DEPLOY            — stateless write operations + error sim
+3.  STATEFUL          — deploy-then-assess with _reset
+4.  FILTER            — OData $filter engine (eq, compound, etc.)
+5.  CLOUD             — GCC High + Commercial E5 cloud targets
+6.  MOCK-CLOUD        — X-Mock-Cloud header override
+7.  EXTENDED-FILTER   — ne, gt, lt, ge, le, startswith, contains, or
+8.  PARTIAL           — mid-deployment scenario posture
+9.  AUTH              — Bearer-only enforcement + error sim edge cases
+10. EXPAND            — $expand inline resource expansion
+11. GCC-HIGH-SCENARIOS — GCC High hardened + partial posture
 
 Usage:
     python test_harness.py                             # run all workflows
@@ -886,6 +888,174 @@ def test_auth_edge_cases() -> list[tuple[str, bool, str]]:
     return results
 
 
+# ---------------------------------------------------------------------------
+# $expand tests — inline related resource expansion
+# ---------------------------------------------------------------------------
+
+def test_expand(client: GraphClient) -> list[tuple[str, bool, str]]:
+    """Test $expand query parameter for inline resource expansion."""
+    results = []
+
+    # Expand memberOf on users (groups fixture is empty in greenfield)
+    r = client.get("/v1.0/users", params={"$expand": "memberOf"})
+    users = r.json().get("value", [])
+    has_member_of = all("memberOf" in u for u in users)
+    results.append(("$expand: users memberOf", has_member_of and len(users) == 2,
+                     f"{len(users)} users, all have memberOf={has_member_of}"))
+
+    # Expand authentication on users
+    r = client.get("/v1.0/users", params={"$expand": "authentication"})
+    users = r.json().get("value", [])
+    has_auth = all("authentication" in u for u in users)
+    results.append(("$expand: users authentication", has_auth,
+                     f"all have authentication={has_auth}"))
+
+    # Expand on /me singleton
+    r = client.get("/v1.0/me", params={"$expand": "authentication"})
+    me = r.json()
+    results.append(("$expand: /me authentication", "authentication" in me,
+                     f"has authentication={'authentication' in me}, methods={len(me.get('authentication', []))}"))
+
+    # Expand members on directoryRoles
+    r = client.get("/v1.0/directoryRoles", params={"$expand": "members"})
+    roles = r.json().get("value", [])
+    has_members = all("members" in role for role in roles)
+    results.append(("$expand: directoryRoles members", has_members and len(roles) > 0,
+                     f"{len(roles)} roles, all have members={has_members}"))
+
+    # Wildcard expand on users
+    r = client.get("/v1.0/users", params={"$expand": "*"})
+    users = r.json().get("value", [])
+    has_both = all("memberOf" in u and "authentication" in u for u in users)
+    results.append(("$expand=*: users wildcard", has_both,
+                     f"all have memberOf+authentication={has_both}"))
+
+    # Unknown expand field — graceful
+    r = client.get("/v1.0/users", params={"$expand": "nonexistent"})
+    users = r.json().get("value", [])
+    no_extra = all("nonexistent" not in u for u in users)
+    results.append(("$expand: unknown field graceful", r.status_code == 200 and no_extra,
+                     f"status={r.status_code}, no extra key={no_extra}"))
+
+    # Combine $expand + $filter + $top
+    r = client.get("/v1.0/users", params={
+        "$expand": "memberOf",
+        "$filter": "userType eq 'Member'",
+        "$top": "1",
+    })
+    combo = r.json().get("value", [])
+    results.append(("$expand + $filter + $top combo",
+                     len(combo) == 1 and "memberOf" in combo[0],
+                     f"{len(combo)} user(s), memberOf={'memberOf' in combo[0] if combo else '?'}"))
+
+    return results
+
+
+# ---------------------------------------------------------------------------
+# GCC High scenarios — hardened + partial posture assessment
+# ---------------------------------------------------------------------------
+
+def test_gcc_high_scenarios() -> list[tuple[str, bool, str]]:
+    """Test GCC High hardened and partial scenarios."""
+    results = []
+
+    # --- Hardened ---
+    port_h = get_free_port()
+    proc_h = start_server(port_h, "hardened", cloud="gcc-high")
+    try:
+        client = GraphClient(f"http://localhost:{port_h}")
+
+        # Health check
+        r = client.get("/health")
+        health = r.json()
+        results.append(("GCC High hardened: health",
+                         health.get("cloud") == "gcc-high" and health.get("scenario") == "hardened",
+                         f"cloud={health.get('cloud')}, scenario={health.get('scenario')}"))
+
+        # 8 CA policies, all report-only
+        policies = client.get_ca_policies()
+        all_report_only = all(p.get("state") == "enabledForReportingButNotEnforced" for p in policies)
+        results.append(("GCC High hardened: 8 report-only CA policies",
+                         len(policies) == 8 and all_report_only,
+                         f"{len(policies)} policies, all report-only={all_report_only}"))
+
+        # Break-glass excluded
+        all_excluded = all(
+            BREAKGLASS_ID in (p.get("conditions") or {}).get("users", {}).get("excludeUsers", [])
+            for p in policies
+        )
+        results.append(("GCC High hardened: break-glass excluded",
+                         all_excluded,
+                         f"all exclude {BREAKGLASS_ID}={all_excluded}"))
+
+        # FIDO2 registered
+        auth_methods = client.get_me_auth_methods()
+        fido2 = [m for m in auth_methods if "fido2" in m.get("@odata.type", "").lower()]
+        results.append(("GCC High hardened: FIDO2 registered",
+                         len(fido2) == 1,
+                         f"{len(fido2)} FIDO2 key(s)"))
+
+        # All devices compliant
+        devices = client.get_managed_devices()
+        all_compliant = all(d.get("complianceState") == "compliant" for d in devices)
+        results.append(("GCC High hardened: 3 compliant devices",
+                         len(devices) == 3 and all_compliant,
+                         f"{len(devices)} devices, all compliant={all_compliant}"))
+
+        # URLs use graph.microsoft.us
+        r = client.get("/v1.0/users")
+        context = r.json().get("@odata.context", "")
+        results.append(("GCC High hardened: graph.microsoft.us URL",
+                         "graph.microsoft.us" in context,
+                         f"context={context[:60]}"))
+    finally:
+        stop_server(proc_h)
+
+    # --- Partial ---
+    port_p = get_free_port()
+    proc_p = start_server(port_p, "partial", cloud="gcc-high")
+    try:
+        client = GraphClient(f"http://localhost:{port_p}")
+
+        # 3 CA policies (subset)
+        policies = client.get_ca_policies()
+        results.append(("GCC High partial: 3 CA policies",
+                         len(policies) == 3,
+                         f"{len(policies)} policies"))
+
+        # Only 1 auth method enabled
+        auth = client.get_auth_methods_policy()
+        configs = auth.get("authenticationMethodConfigurations", [])
+        enabled = [c for c in configs if c.get("state") == "enabled"]
+        results.append(("GCC High partial: 1 auth method enabled",
+                         len(enabled) == 1,
+                         f"{len(enabled)} enabled: {[c.get('id') for c in enabled]}"))
+
+        # 1 managed device
+        devices = client.get_managed_devices()
+        results.append(("GCC High partial: 1 device",
+                         len(devices) == 1,
+                         f"{len(devices)} device(s)"))
+
+        # No FIDO2 in partial
+        auth_methods = client.get_me_auth_methods()
+        fido2 = [m for m in auth_methods if "fido2" in m.get("@odata.type", "").lower()]
+        results.append(("GCC High partial: no FIDO2",
+                         len(fido2) == 0,
+                         f"{len(fido2)} FIDO2 key(s)"))
+
+        # URLs use graph.microsoft.us
+        r = client.get("/v1.0/users")
+        context = r.json().get("@odata.context", "")
+        results.append(("GCC High partial: graph.microsoft.us URL",
+                         "graph.microsoft.us" in context,
+                         f"context={context[:60]}"))
+    finally:
+        stop_server(proc_p)
+
+    return results
+
+
 def print_results(title: str, results: list[tuple[str, bool, str]]):
     print(f"\n{'=' * 70}")
     print(f"  {title}")
@@ -953,7 +1123,8 @@ def main():
     parser.add_argument("--workflow",
                         choices=["assess", "deploy", "stateful", "filter",
                                  "cloud", "mock-cloud", "extended-filter",
-                                 "partial", "auth", "all"],
+                                 "partial", "auth", "expand",
+                                 "gcc-high-scenarios", "all"],
                         default="all")
     parser.add_argument("--port", type=int, default=0, help="Port (0 = auto)")
     args = parser.parse_args()
@@ -1087,6 +1258,26 @@ def main():
             auth_results = test_auth_edge_cases()
             print_results("Auth Enforcement + Error Simulation", auth_results)
             if not all(ok for _, ok, _ in auth_results):
+                all_ok = False
+
+        # ---- EXPAND workflow ----
+        if args.workflow in ("expand", "all"):
+            print("\nStarting greenfield server for $expand tests...")
+            proc = start_server(ports[0], "greenfield")
+            procs.append(proc)
+            client = GraphClient(f"http://localhost:{ports[0]}")
+            expand_results = test_expand(client)
+            print_results("OData $expand Inline Expansion", expand_results)
+            stop_server(proc); procs.remove(proc)
+            if not all(ok for _, ok, _ in expand_results):
+                all_ok = False
+
+        # ---- GCC HIGH SCENARIOS workflow ----
+        if args.workflow in ("gcc-high-scenarios", "all"):
+            print("\nTesting GCC High hardened and partial scenarios...")
+            gcc_high_results = test_gcc_high_scenarios()
+            print_results("GCC High Scenarios — Hardened + Partial", gcc_high_results)
+            if not all(ok for _, ok, _ in gcc_high_results):
                 all_ok = False
 
     finally:
