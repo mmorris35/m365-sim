@@ -9,6 +9,7 @@ Provides:
 import subprocess
 import time
 import socket
+from pathlib import Path
 import pytest
 import httpx
 
@@ -36,10 +37,15 @@ def mock_server():
     port = get_free_port()
     url = f"http://localhost:{port}"
 
+    # Find git root by looking for .git directory
+    git_root = Path(__file__).parent.parent
+    while git_root != git_root.parent and not (git_root / ".git").exists():
+        git_root = git_root.parent
+
     # Start subprocess
     process = subprocess.Popen(
         ["python3", "server.py", "--port", str(port)],
-        cwd="/home/mmn/github/m365-sim",
+        cwd=str(git_root),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )

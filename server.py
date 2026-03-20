@@ -14,6 +14,8 @@ import json
 import logging
 import re
 import sys
+import threading
+import time
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -32,6 +34,7 @@ SCENARIO = "greenfield"
 CLOUD = "gcc-moderate"
 PORT = 8888
 STATEFUL = False
+WATCH = False
 
 
 def load_fixtures(cloud: str, scenario: str) -> dict[str, dict]:
@@ -81,6 +84,41 @@ def load_fixtures(cloud: str, scenario: str) -> dict[str, dict]:
     return fixtures
 
 
+def _watch_fixtures(app: "FastAPI", cloud: str, scenario: str):
+    """Background thread that watches fixture files for changes."""
+    base_path = Path(__file__).parent / "scenarios" / cloud
+    dirs_to_watch = [base_path / scenario]
+    if scenario != "greenfield":
+        dirs_to_watch.append(base_path / "greenfield")
+
+    # Build initial mtime map
+    mtimes: dict[str, float] = {}
+    for watch_dir in dirs_to_watch:
+        if watch_dir.exists():
+            for f in watch_dir.glob("*.json"):
+                mtimes[str(f)] = f.stat().st_mtime
+
+    while True:
+        time.sleep(2)
+        changed = False
+        for watch_dir in dirs_to_watch:
+            if not watch_dir.exists():
+                continue
+            for f in watch_dir.glob("*.json"):
+                path_str = str(f)
+                current_mtime = f.stat().st_mtime
+                if path_str not in mtimes or mtimes[path_str] != current_mtime:
+                    mtimes[path_str] = current_mtime
+                    changed = True
+                    logger.info(f"WATCH: detected change in {f.name}")
+        if changed:
+            new_fixtures = load_fixtures(cloud, scenario)
+            app.state.fixtures = new_fixtures
+            if hasattr(app.state, "baseline_fixtures"):
+                app.state.baseline_fixtures = copy.deepcopy(new_fixtures)
+            logger.info(f"WATCH: reloaded {len(new_fixtures)} fixtures")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """FastAPI lifespan context manager for startup/shutdown."""
@@ -100,6 +138,15 @@ async def lifespan(app: FastAPI):
     else:
         app.state.fixtures = fixtures
         logger.info(f"Server starting with scenario={SCENARIO}, cloud={CLOUD}")
+
+    # Start watch thread if enabled
+    watch_thread = None
+    if WATCH:
+        watch_thread = threading.Thread(
+            target=_watch_fixtures, args=(app, CLOUD, SCENARIO), daemon=True
+        )
+        watch_thread.start()
+        logger.info(f"Watch thread started for {CLOUD}/{SCENARIO}")
 
     yield
 
@@ -396,6 +443,7 @@ async def health():
         "status": "healthy",
         "scenario": app.state.scenario,
         "cloud": app.state.cloud,
+        "watch": WATCH,
     }
 
 
@@ -761,6 +809,30 @@ async def reset_fixtures(request: Request):
     )
 
 
+@app.post("/v1.0/_reload")
+async def reload_fixtures(request: Request):
+    """POST /v1.0/_reload — reload fixtures from disk."""
+    cloud = request.app.state.cloud
+    scenario = request.app.state.scenario
+    new_fixtures = load_fixtures(cloud, scenario)
+    request.app.state.fixtures = new_fixtures
+    if hasattr(request.app.state, "baseline_fixtures"):
+        request.app.state.baseline_fixtures = copy.deepcopy(new_fixtures)
+    fixtures_count = len(new_fixtures)
+
+    logger.info(f"RELOAD: reloaded {fixtures_count} fixtures from disk for {cloud}/{scenario}")
+
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "reloaded",
+            "fixtures_loaded": fixtures_count,
+            "scenario": scenario,
+            "cloud": cloud,
+        },
+    )
+
+
 @app.api_route("/{path:path}", methods=["GET", "POST", "PATCH", "DELETE", "PUT"])
 async def catch_all(path: str, request: Request):
     """Catch-all 404 handler for unmapped paths."""
@@ -805,6 +877,12 @@ def parse_args():
         default=False,
         help="Enable stateful write operations (default: False)",
     )
+    parser.add_argument(
+        "--watch",
+        action="store_true",
+        default=False,
+        help="Enable fixture file watcher for hot reload (default: False)",
+    )
 
     return parser.parse_args()
 
@@ -814,11 +892,12 @@ def main():
     args = parse_args()
 
     # Update module-level variables
-    global SCENARIO, CLOUD, PORT, STATEFUL
+    global SCENARIO, CLOUD, PORT, STATEFUL, WATCH
     SCENARIO = args.scenario
     CLOUD = args.cloud
     PORT = args.port
     STATEFUL = args.stateful
+    WATCH = args.watch
 
     # Configure logging
     logging.basicConfig(
