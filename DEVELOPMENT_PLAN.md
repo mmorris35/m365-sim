@@ -31,9 +31,14 @@ Use the m365-sim-executor agent to execute subtask X.Y.Z
 - [x] Phase 08 — TenantBuilder Fluent API
 - [x] Phase 09 — Stateful Write Operations
 - [x] Phase 10 — Minimal $filter Engine
+- [ ] Phase 11 — Partial Scenario
+- [ ] Phase 12 — Commercial E5 Cloud Target
+- [ ] Phase 13 — Hot-Reload Fixtures
+- [ ] Phase 14 — Docker Packaging
+- [ ] Phase 15 — OSCAL Component Definition
 
-**Current**: All phases complete
-**Status**: MVP + extensions complete
+**Current**: Phase 11
+**Next**: 11.1.1
 
 ---
 
@@ -1642,24 +1647,633 @@ git add -A && git commit -m "test(filter): OData $filter engine tests [10.1.2]"
 
 ---
 
-## v2 Roadmap (Post-MVP)
+## Phase 11: Partial Scenario
 
-The following features are planned for v2, after MVP and extensions are complete.
+**Goal**: Create a mid-deployment fixture set representing 3 of 8 CA policies deployed, 1 of 3 devices enrolled, some auth methods enabled. Tests the "in-progress remediation" assessment path.
+**Duration**: 1 session
 
-### v2.1: OSCAL Component Definition Generation
-**Status**: Deferred — implement after MVP
+### Task 11.1: Partial Scenario Fixtures and Tests
 
-### v2.2: Partial Scenario
-**Status**: Deferred — mid-deployment state between greenfield and hardened
+**Git**: Create branch `feature/11-1-partial-scenario` when starting first subtask.
 
-### v2.3: Commercial E5 Cloud Target
-**Status**: Deferred — appropriate license SKUs for commercial E5
+**Subtask 11.1.1: Partial Scenario Fixtures (Single Session)**
 
-### v2.4: Hot-Reload Fixtures
-**Status**: Deferred — reload fixture files without server restart
+**Prerequisites**:
+- [x] 10.1.2: Filter Engine Tests
 
-### v2.6: Docker Packaging
-**Status**: Deferred — container image for CI environments
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/11-1-partial-scenario
+```
+
+**Deliverables**:
+- [ ] Create `scenarios/gcc-moderate/partial/conditional_access_policies.json` with 3 of 8 CMMC policies:
+  1. CMMC-MFA-AllUsers — require MFA for all users
+  2. CMMC-Block-Legacy-Auth — block legacy authentication protocols
+  3. CMMC-MFA-Admins — require phishing-resistant MFA for admin roles
+  - **ALL** policies must have `"state": "enabledForReportingButNotEnforced"` (NOT `"enabled"`)
+  - **ALL** policies must exclude break-glass account (`00000000-0000-0000-0000-000000000011`) in `conditions.users.excludeUsers`
+  - Use same JSON structure as hardened CA policies (copy 3 of the 8 from hardened fixture)
+- [ ] Create `scenarios/gcc-moderate/partial/auth_methods_policy.json` — same structure as greenfield but with:
+  - `microsoftAuthenticator`: `state: "enabled"` (partially deployed)
+  - `fido2`: `state: "disabled"` (not yet deployed)
+  - `temporaryAccessPass`: `state: "disabled"` (not yet deployed)
+  - `sms`: `state: "disabled"` (unchanged)
+- [ ] Create `scenarios/gcc-moderate/partial/me_auth_methods.json` — same as greenfield (Authenticator + password, no FIDO2 yet)
+- [ ] Create `scenarios/gcc-moderate/partial/managed_devices.json` — 1 device:
+  - Windows 11 Pro laptop, `complianceState: "compliant"`, Intune managed (same as first device in hardened)
+- [ ] Create `scenarios/gcc-moderate/partial/compliance_policies.json` — 1 policy:
+  - CMMC-Windows-Compliance (same as hardened, but only Windows — no iOS/Android yet)
+- [ ] All fixtures must include `@odata.context` fields matching real Graph API responses
+- [ ] Verify `python server.py --scenario partial` starts and serves fixtures
+- [ ] Partial scenario inherits greenfield fixtures for unchanged endpoints (via existing fixture overlay mechanism)
+
+**Success Criteria**:
+- [ ] `conditional_access_policies.json` has exactly 3 policies
+- [ ] `grep -c "enabledForReportingButNotEnforced" scenarios/gcc-moderate/partial/conditional_access_policies.json` returns 3
+- [ ] `grep -c "00000000-0000-0000-0000-000000000011" scenarios/gcc-moderate/partial/conditional_access_policies.json` returns 3
+- [ ] `auth_methods_policy.json` has 1 enabled + 3 disabled methods
+- [ ] `managed_devices.json` has 1 device with `complianceState: "compliant"`
+- [ ] `compliance_policies.json` has 1 policy
+- [ ] `python server.py --scenario partial` starts and loads fixtures
+- [ ] Partial scenario inherits greenfield fixtures for `/users`, `/organization`, etc.
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(partial): mid-deployment scenario fixtures [11.1.1]"
+```
+
+---
+
+**Subtask 11.1.2: Partial Scenario Tests (Single Session)**
+
+**Prerequisites**:
+- [x] 11.1.1: Partial Scenario Fixtures
+
+**Deliverables**:
+- [ ] Create `tests/test_partial.py` with:
+  - Separate `mock_server_partial` fixture that starts server with `--scenario partial`
+  - `test_partial_ca_policies_count` — 3 policies (not 0, not 8)
+  - `test_partial_ca_policies_report_only` — all 3 policies have state `enabledForReportingButNotEnforced`
+  - `test_partial_ca_policies_breakglass_excluded` — all 3 policies exclude break-glass account
+  - `test_partial_auth_methods` — only microsoftAuthenticator enabled, fido2/TAP/sms disabled
+  - `test_partial_managed_devices` — 1 device, compliant
+  - `test_partial_compliance_policies` — 1 policy
+  - `test_partial_inherits_greenfield_users` — `/users` returns same 2 users as greenfield
+  - `test_partial_inherits_greenfield_organization` — `/organization` returns Contoso Defense LLC
+  - `test_partial_no_fido2` — me_auth_methods has 2 entries (no FIDO2)
+- [ ] All existing tests still pass
+
+**Success Criteria**:
+- [ ] `pytest tests/test_partial.py -v` all green
+- [ ] At least 9 partial-specific tests
+- [ ] `pytest tests/ -v` — ALL tests pass
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(partial): mid-deployment scenario tests [11.1.2]"
+```
+
+---
+
+### Task 11.1 Complete — Squash Merge
+- [ ] All subtasks complete (11.1.1 and 11.1.2)
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/11-1-partial-scenario`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/11-1-partial-scenario
+  git commit -m "feat: partial mid-deployment scenario with 3 CA policies and 1 device"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/11-1-partial-scenario
+  git push origin --delete feature/11-1-partial-scenario
+  ```
+
+---
+
+## Phase 12: Commercial E5 Cloud Target
+
+**Goal**: Create fixture set for commercial E5 tenants. Same Graph API endpoints as GCC Moderate, but different license SKU names in `/organization` responses. Uses `graph.microsoft.com` (same as GCC Moderate).
+**Duration**: 1 session
+
+### Task 12.1: Commercial E5 Fixtures
+
+**Git**: Create branch `feature/12-1-commercial-e5` when starting first subtask.
+
+**Subtask 12.1.1: Commercial E5 Greenfield Fixtures (Single Session)**
+
+**Prerequisites**:
+- [x] 11.1.2: Partial Scenario Tests
+
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/12-1-commercial-e5
+```
+
+**Deliverables**:
+- [ ] Create directory `scenarios/commercial-e5/greenfield/`
+- [ ] Create `scenarios/commercial-e5/greenfield/organization.json` — same structure as GCC Moderate but with:
+  - `displayName`: "Contoso Corp" (commercial tenant, not defense)
+  - `assignedPlans` with commercial E5 SKU plan IDs:
+    - `EXCHANGE_S_ENTERPRISE` (Exchange Online Plan 2) — `efb87545-963c-4e0d-99df-69c6916d9eb0`
+    - `MICROSOFT_DEFENDER_EXPERT` (Microsoft Defender) — `64bfac92-2b17-4482-b5e5-a0304429de3e`
+    - `INTUNE_A` (Intune Plan 1) — `c1ec4a95-1f05-45b3-a911-aa3fa01094f5`
+    - `AAD_PREMIUM_P2` (Azure AD Premium P2) — `eec0eb4f-6444-4f95-aba0-50c24d67f998`
+  - `verifiedDomains`: `contoso.com` + `contoso.onmicrosoft.com`
+  - All `@odata.context` URLs use `https://graph.microsoft.com/v1.0` (same as GCC Moderate)
+- [ ] Create `scenarios/commercial-e5/greenfield/users.json` — 2 users:
+  - Admin User (`admin@contoso.com`) — Global Administrator
+  - BreakGlass Admin (`breakglass@contoso.com`) — same ID pattern `00000000-0000-0000-0000-000000000011`
+- [ ] Create `scenarios/commercial-e5/greenfield/me.json` — Admin User singleton
+- [ ] For all other fixtures: copy from gcc-moderate greenfield but update `@odata.context` to reference `contoso.com` domain where applicable. Since both use `graph.microsoft.com`, most fixtures are identical — only organization, users, me, and domains differ.
+- [ ] Create remaining fixtures by copying GCC Moderate greenfield files that don't need changes:
+  ```bash
+  # Copy all fixtures that don't reference tenant-specific data
+  for f in groups.json applications.json devices.json managed_devices.json compliance_policies.json \
+    device_configurations.json device_enrollment_configurations.json conditional_access_policies.json \
+    named_locations.json security_incidents.json security_alerts.json secure_scores.json \
+    secure_score_control_profiles.json audit_directory.json information_protection_labels.json \
+    directory_roles.json directory_role_members.json role_definitions.json \
+    role_eligibility_schedules.json role_assignment_schedules.json; do
+    cp scenarios/gcc-moderate/greenfield/$f scenarios/commercial-e5/greenfield/$f
+  done
+  ```
+- [ ] Create `scenarios/commercial-e5/greenfield/domains.json` — `contoso.com` + `contoso.onmicrosoft.com`
+- [ ] Create `scenarios/commercial-e5/greenfield/me_auth_methods.json` — same structure as GCC Moderate (Authenticator + password)
+- [ ] Create `scenarios/commercial-e5/greenfield/auth_methods_policy.json` — same as GCC Moderate (all disabled)
+- [ ] Create `scenarios/commercial-e5/greenfield/role_assignments.json` — Admin User assigned to Global Administrator
+- [ ] Create `scenarios/commercial-e5/greenfield/service_principals.json` — same as GCC Moderate (Microsoft Graph SP + common SPs)
+- [ ] Create `scenarios/commercial-e5/greenfield/audit_sign_ins.json` — 1 sign-in entry for Admin User
+- [ ] Verify `python server.py --cloud commercial-e5` starts and serves fixtures
+- [ ] Verify `X-Mock-Cloud: commercial-e5` header override works
+
+**Success Criteria**:
+- [ ] `ls scenarios/commercial-e5/greenfield/*.json | wc -l` matches GCC Moderate greenfield count (29)
+- [ ] `organization.json` has commercial E5 SKU plan IDs (not GCC Moderate IDs)
+- [ ] `organization.json` `displayName` is "Contoso Corp"
+- [ ] `users.json` has `contoso.com` domain (not `contoso-defense.com`)
+- [ ] `python server.py --cloud commercial-e5` starts without error
+- [ ] `curl -H "Authorization: Bearer x" http://localhost:8888/v1.0/organization` returns commercial E5 org
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(commercial-e5): greenfield fixtures with E5 SKUs [12.1.1]"
+```
+
+---
+
+**Subtask 12.1.2: Commercial E5 Tests (Single Session)**
+
+**Prerequisites**:
+- [x] 12.1.1: Commercial E5 Greenfield Fixtures
+
+**Deliverables**:
+- [ ] Create `tests/test_commercial_e5.py` with:
+  - Separate `mock_server_e5` fixture that starts server with `--cloud commercial-e5`
+  - `test_e5_organization_name` — displayName is "Contoso Corp"
+  - `test_e5_organization_plans` — has commercial E5 SKU plan IDs
+  - `test_e5_users_domain` — users have `contoso.com` domain
+  - `test_e5_domains` — domains include `contoso.com`
+  - `test_e5_graph_api_url` — `@odata.context` uses `graph.microsoft.com` (same as GCC Moderate)
+  - `test_e5_health` — `/health` returns `cloud: "commercial-e5"`
+  - `test_e5_ca_policies_empty` — fresh tenant, empty CA policies
+  - `test_e5_auth_methods_disabled` — all auth methods disabled
+- [ ] All existing tests still pass
+
+**Success Criteria**:
+- [ ] `pytest tests/test_commercial_e5.py -v` all green
+- [ ] At least 8 tests
+- [ ] `pytest tests/ -v` — ALL tests pass
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(commercial-e5): commercial E5 cloud target tests [12.1.2]"
+```
+
+---
+
+### Task 12.1 Complete — Squash Merge
+- [ ] All subtasks complete (12.1.1 and 12.1.2)
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/12-1-commercial-e5`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/12-1-commercial-e5
+  git commit -m "feat: commercial E5 cloud target with tenant-specific fixtures"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/12-1-commercial-e5
+  git push origin --delete feature/12-1-commercial-e5
+  ```
+
+---
+
+## Phase 13: Hot-Reload Fixtures
+
+**Goal**: Reload fixture JSON files from disk without restarting the server. Useful during fixture development — edit a JSON file, hit a reload endpoint, test the change.
+**Duration**: 1 session
+
+### Task 13.1: Reload Endpoint
+
+**Git**: Create branch `feature/13-1-hot-reload` when starting first subtask.
+
+**Subtask 13.1.1: Fixture Reload Endpoint (Single Session)**
+
+**Prerequisites**:
+- [x] 12.1.2: Commercial E5 Tests
+
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/13-1-hot-reload
+```
+
+**Deliverables**:
+- [ ] Add `POST /v1.0/_reload` endpoint to `server.py`:
+  - Calls `load_fixtures(app.state.cloud, app.state.scenario)` to reload all fixtures from disk
+  - Updates `app.state.fixtures` with the newly loaded fixtures
+  - If in stateful mode, also updates `app.state.baseline_fixtures` with the new baseline
+  - Returns `{"status": "reloaded", "fixtures_loaded": N, "scenario": "...", "cloud": "..."}`
+  - Logs: `logger.info(f"RELOAD: reloaded {N} fixtures from disk for {cloud}/{scenario}")`
+- [ ] Add `--watch` CLI flag to `server.py` (default: False):
+  - When enabled, starts a background thread that watches `scenarios/{cloud}/{scenario}/` for `.json` file changes using `pathlib` + polling (check mtime every 2 seconds)
+  - On change detection: automatically reload fixtures (same as POST /_reload)
+  - Log: `logger.info(f"WATCH: detected change in {filename}, reloading fixtures")`
+  - Implementation: use a simple polling loop with `threading.Thread(daemon=True)`:
+    ```python
+    import threading
+    import time
+
+    def _watch_fixtures(app: FastAPI, cloud: str, scenario: str):
+        """Background thread that watches fixture files for changes."""
+        base_path = Path(__file__).parent / "scenarios" / cloud
+        dirs_to_watch = [base_path / scenario]
+        if scenario != "greenfield":
+            dirs_to_watch.append(base_path / "greenfield")
+
+        # Build initial mtime map
+        mtimes: dict[str, float] = {}
+        for watch_dir in dirs_to_watch:
+            if watch_dir.exists():
+                for f in watch_dir.glob("*.json"):
+                    mtimes[str(f)] = f.stat().st_mtime
+
+        while True:
+            time.sleep(2)
+            changed = False
+            for watch_dir in dirs_to_watch:
+                if not watch_dir.exists():
+                    continue
+                for f in watch_dir.glob("*.json"):
+                    path_str = str(f)
+                    current_mtime = f.stat().st_mtime
+                    if path_str not in mtimes or mtimes[path_str] != current_mtime:
+                        mtimes[path_str] = current_mtime
+                        changed = True
+                        logger.info(f"WATCH: detected change in {f.name}")
+            if changed:
+                new_fixtures = load_fixtures(cloud, scenario)
+                app.state.fixtures = new_fixtures
+                if hasattr(app.state, 'baseline_fixtures'):
+                    app.state.baseline_fixtures = copy.deepcopy(new_fixtures)
+                logger.info(f"WATCH: reloaded {len(new_fixtures)} fixtures")
+    ```
+  - Start the watch thread in the `lifespan` context manager when `--watch` is enabled
+- [ ] Update `/health` endpoint to include `"watch": true/false` in response
+
+**Success Criteria**:
+- [ ] `POST /_reload` returns 200 with fixture count
+- [ ] After modifying a fixture JSON file on disk, `POST /_reload` picks up the change
+- [ ] `--watch` flag starts background watcher that auto-reloads on file changes
+- [ ] `--watch` without `--stateful` works correctly
+- [ ] `--watch` with `--stateful` updates both fixtures and baseline
+- [ ] `/health` shows `"watch": true` when `--watch` is enabled
+- [ ] All existing tests still pass (/_reload returns 200, not 404, since it's always available)
+- [ ] No TODO/FIXME in server.py
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(reload): hot-reload endpoint and --watch file watcher [13.1.1]"
+```
+
+---
+
+**Subtask 13.1.2: Hot-Reload Tests (Single Session)**
+
+**Prerequisites**:
+- [x] 13.1.1: Fixture Reload Endpoint
+
+**Deliverables**:
+- [ ] Create `tests/test_reload.py` with:
+  - `test_reload_endpoint` — POST /_reload returns 200 with fixture count and scenario
+  - `test_reload_picks_up_changes` — modify a fixture file on disk (add a user to users.json), POST /_reload, GET /v1.0/users returns the new data, then restore original file
+  - `test_reload_health_shows_watch_false` — `/health` returns `watch: false` by default
+  - `test_reload_does_not_break_existing_fixtures` — POST /_reload, verify all endpoints still work
+- [ ] All existing tests still pass
+
+**Success Criteria**:
+- [ ] `pytest tests/test_reload.py -v` all green
+- [ ] At least 4 reload tests
+- [ ] `pytest tests/ -v` — ALL tests pass
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(reload): hot-reload endpoint tests [13.1.2]"
+```
+
+---
+
+### Task 13.1 Complete — Squash Merge
+- [ ] All subtasks complete (13.1.1 and 13.1.2)
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/13-1-hot-reload`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/13-1-hot-reload
+  git commit -m "feat: hot-reload fixtures with /_reload endpoint and --watch file watcher"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/13-1-hot-reload
+  git push origin --delete feature/13-1-hot-reload
+  ```
+
+---
+
+## Phase 14: Docker Packaging
+
+**Goal**: Containerize the m365-sim server for CI pipelines and easy deployment. `docker run m365-sim --scenario hardened` should just work.
+**Duration**: 1 session
+
+### Task 14.1: Dockerfile and Compose
+
+**Git**: Create branch `feature/14-1-docker` when starting first subtask.
+
+**Subtask 14.1.1: Dockerfile and Docker Compose (Single Session)**
+
+**Prerequisites**:
+- [x] 13.1.2: Hot-Reload Tests
+
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/14-1-docker
+```
+
+**Deliverables**:
+- [ ] Create `Dockerfile`:
+  ```dockerfile
+  FROM python:3.12-slim
+
+  WORKDIR /app
+
+  COPY requirements.txt .
+  RUN pip install --no-cache-dir -r requirements.txt
+
+  COPY server.py .
+  COPY scenarios/ scenarios/
+
+  EXPOSE 8888
+
+  ENTRYPOINT ["python", "server.py"]
+  CMD ["--port", "8888"]
+  ```
+- [ ] Create `docker-compose.yml`:
+  ```yaml
+  services:
+    m365-sim:
+      build: .
+      ports:
+        - "${M365_SIM_PORT:-8888}:8888"
+      environment:
+        - SCENARIO=${M365_SIM_SCENARIO:-greenfield}
+        - CLOUD=${M365_SIM_CLOUD:-gcc-moderate}
+      command: ["--scenario", "${M365_SIM_SCENARIO:-greenfield}", "--cloud", "${M365_SIM_CLOUD:-gcc-moderate}", "--port", "8888"]
+
+    m365-sim-hardened:
+      build: .
+      ports:
+        - "${M365_SIM_HARDENED_PORT:-8889}:8888"
+      command: ["--scenario", "hardened", "--cloud", "gcc-moderate", "--port", "8888"]
+      profiles:
+        - hardened
+  ```
+- [ ] Create `.dockerignore`:
+  ```
+  .venv/
+  venv/
+  __pycache__/
+  *.pyc
+  .pytest_cache/
+  .git/
+  .claude/
+  tests/
+  builder/
+  sdk/
+  docs/
+  *.md
+  !scenarios/**/*.json
+  test_harness.py
+  ```
+- [ ] Verify Docker build succeeds: `docker build -t m365-sim .`
+- [ ] Verify Docker run works: `docker run --rm -p 8888:8888 m365-sim`
+- [ ] Verify health check: `curl http://localhost:8888/health`
+- [ ] Verify scenario override: `docker run --rm -p 8888:8888 m365-sim --scenario hardened`
+- [ ] Verify docker-compose works: `docker compose up -d && curl http://localhost:8888/health && docker compose down`
+
+**Success Criteria**:
+- [ ] `docker build -t m365-sim .` succeeds
+- [ ] `docker run --rm -p 8888:8888 m365-sim` starts server and responds to `/health`
+- [ ] `docker run --rm -p 8888:8888 m365-sim --scenario hardened` serves hardened fixtures
+- [ ] `docker run --rm -p 8888:8888 m365-sim --cloud gcc-high` serves GCC High fixtures
+- [ ] Docker image size is under 200MB
+- [ ] `docker compose up -d` starts greenfield on 8888
+- [ ] All existing tests still pass (tests don't use Docker)
+- [ ] No TODO/FIXME in Dockerfile or docker-compose.yml
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(docker): Dockerfile and docker-compose for CI deployment [14.1.1]"
+```
+
+---
+
+### Task 14.1 Complete — Squash Merge
+- [ ] All subtasks complete
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/14-1-docker`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/14-1-docker
+  git commit -m "feat: Docker packaging with Dockerfile and docker-compose"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/14-1-docker
+  git push origin --delete feature/14-1-docker
+  ```
+
+---
+
+## Phase 15: OSCAL Component Definition Generation
+
+**Goal**: Generate NIST OSCAL Component Definition JSON that maps m365-sim fixture endpoints to CMMC L2 / NIST 800-171 controls. This creates a machine-readable compliance artifact that documents which Graph API endpoints provide evidence for which security controls.
+**Duration**: 1-2 sessions
+
+### Task 15.1: OSCAL Generator
+
+**Git**: Create branch `feature/15-1-oscal` when starting first subtask.
+
+**Subtask 15.1.1: OSCAL Component Definition Generator (Single Session)**
+
+**Prerequisites**:
+- [x] 14.1.1: Dockerfile and Docker Compose
+
+**Git Start** (first subtask of this task):
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/15-1-oscal
+```
+
+**Deliverables**:
+- [ ] Create `oscal/generate_component_definition.py` with:
+  - A Python script that generates an OSCAL Component Definition JSON file
+  - The component definition maps m365-sim endpoints to NIST 800-171 Rev 2 controls
+  - Control mapping (endpoint → control family):
+    - `/v1.0/users`, `/v1.0/me` → AC (Access Control): AC.L2-3.1.1, AC.L2-3.1.2
+    - `/v1.0/identity/conditionalAccess/policies` → AC: AC.L2-3.1.3
+    - `/v1.0/policies/authenticationMethodsPolicy` → IA (Identification & Authentication): IA.L2-3.5.3
+    - `/v1.0/me/authentication/methods` → IA: IA.L2-3.5.3
+    - `/v1.0/deviceManagement/managedDevices` → MP (Media Protection): MP.L2-3.8.1
+    - `/v1.0/deviceManagement/deviceCompliancePolicies` → MP: MP.L2-3.8.1
+    - `/v1.0/deviceManagement/deviceConfigurations` → CM (Configuration Management): CM.L2-3.4.1
+    - `/v1.0/security/secureScores` → SC (System & Communications Protection): SC.L2-3.13.1
+    - `/v1.0/auditLogs/signIns` → AU (Audit & Accountability): AU.L2-3.3.1
+    - `/v1.0/auditLogs/directoryAudits` → AU: AU.L2-3.3.2
+    - `/v1.0/directoryRoles`, `/v1.0/roleManagement/directory/roleAssignments` → AC: AC.L2-3.1.2
+    - `/v1.0/informationProtection/policy/labels` → MP: MP.L2-3.8.2
+  - Output format: OSCAL Component Definition JSON per NIST OSCAL 1.1.2 schema:
+    ```json
+    {
+      "component-definition": {
+        "uuid": "<deterministic uuid>",
+        "metadata": {
+          "title": "m365-sim Graph API Simulation Platform",
+          "last-modified": "<ISO datetime>",
+          "version": "1.0.0",
+          "oscal-version": "1.1.2"
+        },
+        "components": [
+          {
+            "uuid": "<deterministic uuid>",
+            "type": "software",
+            "title": "m365-sim",
+            "description": "Microsoft Graph API simulation platform for CMMC 2.0 L2 compliance testing",
+            "control-implementations": [
+              {
+                "uuid": "<deterministic uuid>",
+                "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-171/rev2/json/NIST_SP-800-171_rev2_catalog.json",
+                "description": "NIST SP 800-171 Rev 2 control implementations via Microsoft Graph API",
+                "implemented-requirements": [
+                  {
+                    "uuid": "<deterministic uuid>",
+                    "control-id": "ac.l2-3.1.1",
+                    "description": "Limit system access to authorized users — evidence from /v1.0/users endpoint",
+                    "props": [
+                      {"name": "graph-endpoint", "value": "/v1.0/users"},
+                      {"name": "fixture-file", "value": "users.json"},
+                      {"name": "assessment-method", "value": "automated"}
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+    ```
+  - CLI interface: `python oscal/generate_component_definition.py --output oscal/component-definition.json`
+  - All UUIDs must be deterministic (seeded with fixed namespace UUID + control-id) for reproducibility
+  - Generate at least 12 implemented-requirements covering the control mappings above
+- [ ] Create `oscal/__init__.py` (empty)
+- [ ] Run the generator and save output: `python oscal/generate_component_definition.py --output oscal/component-definition.json`
+- [ ] Validate the output is valid JSON: `python -m json.tool oscal/component-definition.json`
+
+**Success Criteria**:
+- [ ] `python oscal/generate_component_definition.py --output /tmp/test-oscal.json` creates valid JSON
+- [ ] Output has `component-definition.uuid`, `metadata`, and `components` keys
+- [ ] At least 12 `implemented-requirements` entries
+- [ ] Each requirement has `control-id`, `description`, and `props` with `graph-endpoint`
+- [ ] UUIDs are deterministic (running twice produces identical output)
+- [ ] `oscal/component-definition.json` committed to repo as reference artifact
+- [ ] No TODO/FIXME in generator script
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(oscal): OSCAL Component Definition generator [15.1.1]"
+```
+
+---
+
+**Subtask 15.1.2: OSCAL Generator Tests (Single Session)**
+
+**Prerequisites**:
+- [x] 15.1.1: OSCAL Component Definition Generator
+
+**Deliverables**:
+- [ ] Create `tests/test_oscal.py` with:
+  - `test_generate_component_definition` — generator produces valid JSON with required structure
+  - `test_oscal_metadata` — metadata has title, version, oscal-version
+  - `test_oscal_component_type` — component type is "software"
+  - `test_oscal_implemented_requirements_count` — at least 12 requirements
+  - `test_oscal_control_ids_valid` — all control-ids follow pattern `xx.l2-3.x.x`
+  - `test_oscal_graph_endpoints_valid` — all graph-endpoint props start with `/v1.0/`
+  - `test_oscal_deterministic_uuids` — running twice produces identical UUIDs
+  - `test_oscal_covers_all_control_families` — AC, IA, MP, CM, SC, AU families present
+- [ ] All existing tests still pass
+
+**Success Criteria**:
+- [ ] `pytest tests/test_oscal.py -v` all green
+- [ ] At least 8 OSCAL tests
+- [ ] `pytest tests/ -v` — ALL tests pass
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(oscal): OSCAL Component Definition tests [15.1.2]"
+```
+
+---
+
+### Task 15.1 Complete — Squash Merge
+- [ ] All subtasks complete (15.1.1 and 15.1.2)
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Push feature branch: `git push -u origin feature/15-1-oscal`
+- [ ] Squash merge to main:
+  ```bash
+  git checkout main && git pull origin main
+  git merge --squash feature/15-1-oscal
+  git commit -m "feat: OSCAL Component Definition generator mapping Graph API to CMMC L2 controls"
+  git push origin main
+  ```
+- [ ] Clean up:
+  ```bash
+  git branch -d feature/15-1-oscal
+  git push origin --delete feature/15-1-oscal
+  ```
 
 ---
 
