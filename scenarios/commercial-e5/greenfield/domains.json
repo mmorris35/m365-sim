@@ -1,0 +1,17 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#domains",
+  "value": [
+    {
+      "id": "contoso.com",
+      "isDefault": true,
+      "isInitial": false,
+      "isVerified": true
+    },
+    {
+      "id": "contoso.onmicrosoft.com",
+      "isDefault": false,
+      "isInitial": true,
+      "isVerified": true
+    }
+  ]
+}
