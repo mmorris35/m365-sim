@@ -574,7 +574,22 @@ class TenantBuilder:
             output_dir,
             "audit_sign_ins.json",
             "https://graph.microsoft.com/v1.0/$metadata#auditLogs/signIns",
-            [],
+            [
+                {
+                    "id": "signin-001",
+                    "createdDateTime": "2026-03-19T00:00:00Z",
+                    "userDisplayName": "Mike Morris",
+                    "userPrincipalName": "mike@contoso-defense.com",
+                    "userId": "00000000-0000-0000-0000-000000000010",
+                    "appId": "de8bc8b5-d9f9-48b1-a8ad-b748da725064",
+                    "appDisplayName": "Microsoft Azure Portal",
+                    "ipAddress": "192.0.2.1",
+                    "clientAppUsed": "Browser",
+                    "conditionalAccessStatus": "notApplied",
+                    "isInteractive": True,
+                    "status": {"errorCode": 0, "failureReason": None},
+                }
+            ],
         )
         self._write_fixture(
             output_dir,

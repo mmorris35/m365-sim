@@ -175,9 +175,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if request.url.path == "/health":
             return await call_next(request)
 
-        # Check for Authorization header
+        # Check for Authorization header with Bearer scheme
         auth_header = request.headers.get("authorization")
-        if not auth_header:
+        if not auth_header or not auth_header.lower().startswith("bearer "):
             return JSONResponse(
                 status_code=401,
                 content={
@@ -237,7 +237,7 @@ class MockStatusMiddleware(BaseHTTPMiddleware):
 
         # Add Retry-After header for 429
         if status_code == 429:
-            response.headers["Retry-After"] = "60"
+            response.headers["Retry-After"] = "1"
 
         return response
 

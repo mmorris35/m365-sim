@@ -102,7 +102,7 @@ class TestErrorSimulation:
         )
         assert response.status_code == 429
         assert "Retry-After" in response.headers
-        assert response.headers["Retry-After"] == "60"
+        assert response.headers["Retry-After"] == "1"
         data = response.json()
         assert "error" in data
         assert data["error"]["code"] == "Request_Throttled"

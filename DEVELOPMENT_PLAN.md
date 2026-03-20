@@ -37,14 +37,14 @@ Use the m365-sim-executor agent to execute subtask X.Y.Z
 - [x] Phase 14 — Docker Packaging
 - [x] Phase 15 — OSCAL Component Definition
 - [x] Phase 16 — GCC High Fixture Population
-- [ ] Phase 17 — Extended $filter Operators
-- [ ] Phase 18 — $expand Support
-- [ ] Phase 19 — GCC High Hardened and Partial Scenarios
-- [ ] Phase 20 — Commercial E5 Hardened and Partial Scenarios
-- [ ] Phase 21 — Beta API Endpoints
+- [x] Phase 17 — Extended $filter Operators
+- [x] Phase 18 — $expand Support
+- [x] Phase 19 — GCC High Hardened and Partial Scenarios
+- [x] Phase 20 — Commercial E5 Hardened and Partial Scenarios
+- [x] Phase 21 — Beta API Endpoints
 
-**Current**: Phase 17
-**Next**: 17.1.1
+**Current**: Complete
+**Next**: —
 
 ---
 
