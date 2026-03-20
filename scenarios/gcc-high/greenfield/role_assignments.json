@@ -1,5 +1,11 @@
 {
   "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#roleManagement/directory/roleAssignments",
-  "_TODO": "Populate with GCC High-specific fixture data",
-  "value": []
+  "value": [
+    {
+      "id": "assignment-001",
+      "principalId": "00000000-0000-0000-0000-000000000010",
+      "roleDefinitionId": "62e90394-69f5-4237-9190-012177145e10",
+      "directoryScopeId": "/"
+    }
+  ]
 }

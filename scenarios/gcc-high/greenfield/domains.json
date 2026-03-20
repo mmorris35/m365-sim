@@ -1,5 +1,17 @@
 {
   "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#domains",
-  "_TODO": "Populate with GCC High-specific fixture data",
-  "value": []
+  "value": [
+    {
+      "id": "contoso-defense.us",
+      "isDefault": true,
+      "isInitial": false,
+      "isVerified": true
+    },
+    {
+      "id": "contosodefensefederal.onmicrosoft.us",
+      "isDefault": false,
+      "isInitial": true,
+      "isVerified": true
+    }
+  ]
 }

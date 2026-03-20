@@ -1,5 +1,22 @@
 {
   "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#auditLogs/signIns",
-  "_TODO": "Populate with GCC High-specific fixture data",
-  "value": []
+  "value": [
+    {
+      "id": "signin-001",
+      "createdDateTime": "2026-03-19T00:00:00Z",
+      "userDisplayName": "Federal Admin",
+      "userPrincipalName": "admin@contoso-defense.us",
+      "userId": "00000000-0000-0000-0000-000000000010",
+      "appId": "de8bc8b5-d9f9-48b1-a8ad-b748da725064",
+      "appDisplayName": "Microsoft Azure Portal",
+      "ipAddress": "192.0.2.1",
+      "clientAppUsed": "Browser",
+      "conditionalAccessStatus": "notApplied",
+      "isInteractive": true,
+      "status": {
+        "errorCode": 0,
+        "failureReason": null
+      }
+    }
+  ]
 }

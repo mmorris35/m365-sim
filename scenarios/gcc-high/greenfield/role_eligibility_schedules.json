@@ -1,5 +1,4 @@
 {
   "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#roleManagement/directory/roleEligibilitySchedules",
-  "_TODO": "Populate with GCC High-specific fixture data",
   "value": []
 }

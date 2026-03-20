@@ -1,5 +1,50 @@
 {
   "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#organization",
-  "_TODO": "Populate with GCC High-specific fixture data",
-  "value": []
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000001",
+      "displayName": "Contoso Defense Federal LLC",
+      "tenantType": "AAD",
+      "verifiedDomains": [
+        {
+          "name": "contoso-defense.us",
+          "isDefault": true,
+          "isInitial": false,
+          "capabilities": "Email, OfficeCommunicationsOnline"
+        },
+        {
+          "name": "contosodefensefederal.onmicrosoft.us",
+          "isInitial": true,
+          "isDefault": false,
+          "capabilities": "Email, OfficeCommunicationsOnline"
+        }
+      ],
+      "assignedPlans": [
+        {
+          "service": "exchange",
+          "capabilityStatus": "Enabled",
+          "servicePlanId": "efb87545-963c-4e0d-99df-69c6916d9eb0",
+          "assignedTimestamp": "2026-03-01T00:00:00Z"
+        },
+        {
+          "service": "MicrosoftDefenderATP",
+          "capabilityStatus": "Enabled",
+          "servicePlanId": "871d91ec-ec1a-452b-a83f-bd76c7d770ef",
+          "assignedTimestamp": "2026-03-01T00:00:00Z"
+        },
+        {
+          "service": "SCO",
+          "capabilityStatus": "Enabled",
+          "servicePlanId": "c1ec4a95-1f05-45b3-a911-aa3fa01094f5",
+          "assignedTimestamp": "2026-03-01T00:00:00Z"
+        },
+        {
+          "service": "AADPremiumService",
+          "capabilityStatus": "Enabled",
+          "servicePlanId": "41781fb2-bc02-4b7c-bd55-b576c07bb09d",
+          "assignedTimestamp": "2026-03-01T00:00:00Z"
+        }
+      ]
+    }
+  ]
 }

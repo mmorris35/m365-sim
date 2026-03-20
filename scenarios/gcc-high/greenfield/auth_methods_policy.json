@@ -1,6 +1,5 @@
 {
   "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#policies/authenticationMethodsPolicy",
-  "_TODO": "Populate with GCC High-specific fixture data",
   "id": "authenticationMethodsPolicy",
   "policyVersion": "1.5",
   "authenticationMethodConfigurations": [

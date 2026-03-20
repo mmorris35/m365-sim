@@ -1,5 +1,16 @@
 {
-  "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#me/authentication/methods",
-  "_TODO": "Populate with GCC High-specific fixture data",
-  "value": []
+  "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#users('operator-id')/authentication/methods",
+  "value": [
+    {
+      "@odata.type": "#microsoft.graph.microsoftAuthenticatorAuthenticationMethod",
+      "id": "00000000-0000-0000-0000-000000000020",
+      "displayName": "Federal Admin's Phone",
+      "deviceTag": "SoftwareTokenActivated",
+      "phoneAppVersion": "6.2208.7949"
+    },
+    {
+      "@odata.type": "#microsoft.graph.passwordAuthenticationMethod",
+      "id": "00000000-0000-0000-0000-000000000021"
+    }
+  ]
 }
