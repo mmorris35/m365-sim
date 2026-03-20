@@ -1,0 +1,17 @@
+services:
+  m365-sim:
+    build: .
+    ports:
+      - "${M365_SIM_PORT:-8888}:8888"
+    environment:
+      - SCENARIO=${M365_SIM_SCENARIO:-greenfield}
+      - CLOUD=${M365_SIM_CLOUD:-gcc-moderate}
+    command: ["--scenario", "${M365_SIM_SCENARIO:-greenfield}", "--cloud", "${M365_SIM_CLOUD:-gcc-moderate}", "--port", "8888"]
+
+  m365-sim-hardened:
+    build: .
+    ports:
+      - "${M365_SIM_HARDENED_PORT:-8889}:8888"
+    command: ["--scenario", "hardened", "--cloud", "gcc-moderate", "--port", "8888"]
+    profiles:
+      - hardened

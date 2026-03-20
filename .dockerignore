@@ -1,0 +1,14 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.git/
+.claude/
+tests/
+builder/
+sdk/
+docs/
+*.md
+!scenarios/**/*.json
+test_harness.py
