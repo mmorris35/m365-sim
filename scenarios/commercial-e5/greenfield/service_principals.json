@@ -1,0 +1,59 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#servicePrincipals",
+  "value": [
+    {
+      "id": "sp-001",
+      "appId": "00000003-0000-0000-c000-000000000000",
+      "displayName": "Microsoft Graph",
+      "servicePrincipalType": "Application"
+    },
+    {
+      "id": "sp-002",
+      "appId": "00000002-0000-0ff1-ce00-000000000000",
+      "displayName": "Office 365 Exchange Online",
+      "servicePrincipalType": "Application"
+    },
+    {
+      "id": "sp-003",
+      "appId": "00000003-0000-0fff-c000-000000000000",
+      "displayName": "Microsoft SharePoint Online",
+      "servicePrincipalType": "Application"
+    },
+    {
+      "id": "sp-004",
+      "appId": "cc15fd57-2c6c-4117-a88c-83b1d56b4bbe",
+      "displayName": "Microsoft Teams",
+      "servicePrincipalType": "Application"
+    },
+    {
+      "id": "sp-005",
+      "appId": "00000003-0000-0000-0000-000000000000",
+      "displayName": "Windows Azure Active Directory",
+      "servicePrincipalType": "Application"
+    },
+    {
+      "id": "sp-006",
+      "appId": "9bc3ab49-b65d-410a-85ad-de31c8849e32",
+      "displayName": "Microsoft Intune API",
+      "servicePrincipalType": "Application"
+    },
+    {
+      "id": "sp-007",
+      "appId": "0365951c-f08f-497d-be1f-578f81470b69",
+      "displayName": "Microsoft Defender",
+      "servicePrincipalType": "Application"
+    },
+    {
+      "id": "sp-008",
+      "appId": "7f33c9f7-1d34-4350-9afb-2ea859a1a7bd",
+      "displayName": "Graph Explorer",
+      "servicePrincipalType": "Application"
+    },
+    {
+      "id": "sp-009",
+      "appId": "797f4846-ba00-4fd7-ba43-dac1f8f63013",
+      "displayName": "Azure Portal",
+      "servicePrincipalType": "Application"
+    }
+  ]
+}

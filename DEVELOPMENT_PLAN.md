@@ -31,9 +31,9 @@ Use the m365-sim-executor agent to execute subtask X.Y.Z
 - [x] Phase 08 — TenantBuilder Fluent API
 - [x] Phase 09 — Stateful Write Operations
 - [x] Phase 10 — Minimal $filter Engine
-- [ ] Phase 11 — Partial Scenario
-- [ ] Phase 12 — Commercial E5 Cloud Target
-- [ ] Phase 13 — Hot-Reload Fixtures
+- [x] Phase 11 — Partial Scenario
+- [x] Phase 12 — Commercial E5 Cloud Target
+- [x] Phase 13 — Hot-Reload Fixtures
 - [ ] Phase 14 — Docker Packaging
 - [ ] Phase 15 — OSCAL Component Definition
 
@@ -1951,22 +1951,14 @@ git checkout -b feature/13-1-hot-reload
 - [ ] Update `/health` endpoint to include `"watch": true/false` in response
 
 **Success Criteria**:
-- [x] `POST /_reload` returns 200 with fixture count
-- [x] After modifying a fixture JSON file on disk, `POST /_reload` picks up the change
-- [x] `--watch` flag starts background watcher that auto-reloads on file changes
-- [x] `--watch` without `--stateful` works correctly
-- [x] `--watch` with `--stateful` updates both fixtures and baseline
-- [x] `/health` shows `"watch": true` when `--watch` is enabled
-- [x] All existing tests still pass (/_reload returns 200, not 404, since it's always available)
-- [x] No TODO/FIXME in server.py
-
-**Completion Notes**:
-- **Implementation**: Added POST /v1.0/_reload endpoint that reloads all fixtures from disk. Implemented _watch_fixtures background thread that polls fixture file mtimes every 2 seconds. Added --watch CLI flag and WATCH module-level variable. Updated /health endpoint to include watch status. All logic integrated into lifespan context manager.
-- **Files Created**: None (all changes in existing files)
-- **Files Modified**:
-  - `server.py` - added 80 lines: imports (threading, time), WATCH variable, _watch_fixtures function, watch thread startup in lifespan, _reload endpoint, /health watch status, --watch CLI arg, main() WATCH assignment
-- **Tests**: All 4 reload tests passing (test_reload_endpoint_returns_200, test_reload_picks_up_changes, test_health_shows_watch_false_by_default, test_reload_does_not_break_existing_fixtures) + all 101 existing tests = 105 total tests passing
-- **Notes**: Watch thread properly watches both scenario dir and greenfield dir (if scenario != greenfield). Handles both stateful and stateless modes correctly.
+- [ ] `POST /_reload` returns 200 with fixture count
+- [ ] After modifying a fixture JSON file on disk, `POST /_reload` picks up the change
+- [ ] `--watch` flag starts background watcher that auto-reloads on file changes
+- [ ] `--watch` without `--stateful` works correctly
+- [ ] `--watch` with `--stateful` updates both fixtures and baseline
+- [ ] `/health` shows `"watch": true` when `--watch` is enabled
+- [ ] All existing tests still pass (/_reload returns 200, not 404, since it's always available)
+- [ ] No TODO/FIXME in server.py
 
 **Git Commit**:
 ```bash
@@ -1981,12 +1973,12 @@ git add -A && git commit -m "feat(reload): hot-reload endpoint and --watch file 
 - [x] 13.1.1: Fixture Reload Endpoint
 
 **Deliverables**:
-- [ ] Create `tests/test_reload.py` with:
-  - `test_reload_endpoint` — POST /_reload returns 200 with fixture count and scenario
-  - `test_reload_picks_up_changes` — modify a fixture file on disk (add a user to users.json), POST /_reload, GET /v1.0/users returns the new data, then restore original file
-  - `test_reload_health_shows_watch_false` — `/health` returns `watch: false` by default
-  - `test_reload_does_not_break_existing_fixtures` — POST /_reload, verify all endpoints still work
-- [ ] All existing tests still pass
+- [x] Create `tests/test_reload.py` with:
+  - [x] `test_reload_endpoint_returns_200` — POST /_reload returns 200 with fixture count and scenario
+  - [x] `test_reload_picks_up_changes` — modify a fixture file on disk (add a user to users.json), POST /_reload, GET /v1.0/users returns the new data, then restore original file
+  - [x] `test_health_shows_watch_false_by_default` — `/health` returns `watch: false` by default
+  - [x] `test_reload_does_not_break_existing_fixtures` — POST /_reload, verify all endpoints still work
+- [x] All existing tests still pass
 
 **Success Criteria**:
 - [x] `pytest tests/test_reload.py -v` all green
@@ -2009,7 +2001,7 @@ git add -A && git commit -m "test(reload): hot-reload endpoint tests [13.1.2]"
 
 ---
 
-### Task 13.1 Complete — Squash Merge (COMPLETED)
+### Task 13.1 Complete — Squash Merge
 - [x] All subtasks complete (13.1.1 and 13.1.2)
 - [x] All tests pass: `pytest tests/ -v`
 - [x] Push feature branch: `git push -u origin feature/13-1-hot-reload`

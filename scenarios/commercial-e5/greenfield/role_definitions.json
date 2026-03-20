@@ -1,0 +1,75 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#roleManagement/directory/roleDefinitions",
+  "value": [
+    {
+      "id": "62e90394-69f5-4237-9190-012177145e10",
+      "displayName": "Global Administrator",
+      "roleTemplateId": "62e90394-69f5-4237-9190-012177145e10"
+    },
+    {
+      "id": "194ae4cb-b126-40b2-bd5b-6091b380977d",
+      "displayName": "Security Administrator",
+      "roleTemplateId": "194ae4cb-b126-40b2-bd5b-6091b380977d"
+    },
+    {
+      "id": "17315797-102d-40b4-93e0-432062caca18",
+      "displayName": "Compliance Administrator",
+      "roleTemplateId": "17315797-102d-40b4-93e0-432062caca18"
+    },
+    {
+      "id": "f2ef992c-3afb-46b9-b7cf-a126ee74c451",
+      "displayName": "Global Reader",
+      "roleTemplateId": "f2ef992c-3afb-46b9-b7cf-a126ee74c451"
+    },
+    {
+      "id": "fe930be7-5e63-47ad-bce1-b432255ab137",
+      "displayName": "User Administrator",
+      "roleTemplateId": "fe930be7-5e63-47ad-bce1-b432255ab137"
+    },
+    {
+      "id": "29232cdf-9323-42fd-ade2-1d097af3e4de",
+      "displayName": "Exchange Administrator",
+      "roleTemplateId": "29232cdf-9323-42fd-ade2-1d097af3e4de"
+    },
+    {
+      "id": "f28a1f50-f6e7-4571-818b-6a12f2af6b6c",
+      "displayName": "SharePoint Administrator",
+      "roleTemplateId": "f28a1f50-f6e7-4571-818b-6a12f2af6b6c"
+    },
+    {
+      "id": "69029506-85c7-4619-8921-ddb246393064",
+      "displayName": "Teams Administrator",
+      "roleTemplateId": "69029506-85c7-4619-8921-ddb246393064"
+    },
+    {
+      "id": "3a2c62db-5318-420d-8798-34c7694d4793",
+      "displayName": "Intune Administrator",
+      "roleTemplateId": "3a2c62db-5318-420d-8798-34c7694d4793"
+    },
+    {
+      "id": "158c047a-c907-4556-b7ef-446551a6b5f7",
+      "displayName": "Cloud Application Administrator",
+      "roleTemplateId": "158c047a-c907-4556-b7ef-446551a6b5f7"
+    },
+    {
+      "id": "e8611ab8-c189-46e8-94e1-60213ab1f814",
+      "displayName": "Privileged Role Administrator",
+      "roleTemplateId": "e8611ab8-c189-46e8-94e1-60213ab1f814"
+    },
+    {
+      "id": "b1be1c3e-b65d-4f19-8427-f6fa0d97feb9",
+      "displayName": "Conditional Access Administrator",
+      "roleTemplateId": "b1be1c3e-b65d-4f19-8427-f6fa0d97feb9"
+    },
+    {
+      "id": "5d6b6bb7-de71-4623-b4af-eb8670a8e87b",
+      "displayName": "Security Reader",
+      "roleTemplateId": "5d6b6bb7-de71-4623-b4af-eb8670a8e87b"
+    },
+    {
+      "id": "729827e3-9c14-49f7-bb1b-9cd0d9d2e564",
+      "displayName": "Helpdesk Administrator",
+      "roleTemplateId": "729827e3-9c14-49f7-bb1b-9cd0d9d2e564"
+    }
+  ]
+}

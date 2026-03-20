@@ -1,0 +1,50 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#organization",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000001",
+      "displayName": "Contoso Corp",
+      "tenantType": "AAD",
+      "verifiedDomains": [
+        {
+          "name": "contoso.com",
+          "isDefault": true,
+          "isInitial": false,
+          "capabilities": "Email, OfficeCommunicationsOnline"
+        },
+        {
+          "name": "contoso.onmicrosoft.com",
+          "isInitial": true,
+          "isDefault": false,
+          "capabilities": "Email, OfficeCommunicationsOnline"
+        }
+      ],
+      "assignedPlans": [
+        {
+          "service": "exchange",
+          "capabilityStatus": "Enabled",
+          "servicePlanId": "efb87545-963c-4e0d-99df-69c6916d9eb0",
+          "assignedTimestamp": "2026-03-01T00:00:00Z"
+        },
+        {
+          "service": "MicrosoftDefenderATP",
+          "capabilityStatus": "Enabled",
+          "servicePlanId": "64bfac92-2b17-4482-b5e5-a0304429de3e",
+          "assignedTimestamp": "2026-03-01T00:00:00Z"
+        },
+        {
+          "service": "SCO",
+          "capabilityStatus": "Enabled",
+          "servicePlanId": "c1ec4a95-1f05-45b3-a911-aa3fa01094f5",
+          "assignedTimestamp": "2026-03-01T00:00:00Z"
+        },
+        {
+          "service": "AADPremiumService",
+          "capabilityStatus": "Enabled",
+          "servicePlanId": "eec0eb4f-6444-4f95-aba0-50c24d67f998",
+          "assignedTimestamp": "2026-03-01T00:00:00Z"
+        }
+      ]
+    }
+  ]
+}

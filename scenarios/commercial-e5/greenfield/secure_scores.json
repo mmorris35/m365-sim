@@ -1,0 +1,29 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#security/secureScores",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000001_2026-03-19",
+      "createdDateTime": "2026-03-19T00:00:00Z",
+      "currentScore": 12.0,
+      "maxScore": 198.0,
+      "licensedUserCount": 2,
+      "activeUserCount": 1,
+      "enabledServices": [
+        "HasLicense_AAD_P2",
+        "HasLicense_MCAS",
+        "HasLicense_MDE"
+      ],
+      "averageComparativeScores": [
+        {
+          "basis": "AllTenants",
+          "averageScore": 37.42
+        },
+        {
+          "basis": "TotalSeats",
+          "averageScore": 35.18
+        }
+      ],
+      "controlScores": []
+    }
+  ]
+}
