@@ -1,0 +1,27 @@
+{
+  "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#policies/authenticationMethodsPolicy",
+  "id": "authenticationMethodsPolicy",
+  "policyVersion": "1.5",
+  "authenticationMethodConfigurations": [
+    {
+      "@odata.type": "#microsoft.graph.fido2AuthenticationMethodConfiguration",
+      "id": "fido2",
+      "state": "enabled"
+    },
+    {
+      "@odata.type": "#microsoft.graph.microsoftAuthenticatorAuthenticationMethodConfiguration",
+      "id": "microsoftAuthenticator",
+      "state": "enabled"
+    },
+    {
+      "@odata.type": "#microsoft.graph.temporaryAccessPassAuthenticationMethodConfiguration",
+      "id": "temporaryAccessPass",
+      "state": "enabled"
+    },
+    {
+      "@odata.type": "#microsoft.graph.smsAuthenticationMethodConfiguration",
+      "id": "sms",
+      "state": "disabled"
+    }
+  ]
+}

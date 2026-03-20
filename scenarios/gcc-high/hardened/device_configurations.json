@@ -1,0 +1,60 @@
+{
+  "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#deviceManagement/deviceConfigurations",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000501",
+      "@odata.type": "#microsoft.graph.windows10EndpointProtectionConfiguration",
+      "displayName": "CMMC-ASR-Rules",
+      "description": "Attack Surface Reduction rules for CMMC Level 2 compliance",
+      "createdDateTime": "2024-01-06T08:00:00Z",
+      "lastModifiedDateTime": "2024-01-06T08:00:00Z",
+      "attackSurfaceReductionRules": {
+        "blockExecutableContent": "enabled",
+        "blockOfficeAppChildProcess": "enabled",
+        "blockOfficeCommAppChildProcess": "enabled",
+        "blockWin32ImportFromMacroCode": "enabled",
+        "blockWebShellCreation": "enabled",
+        "blockCredentialStealing": "enabled",
+        "blockUntrustedUnsignedProcess": "enabled",
+        "blockExecutableDownloads": "enabled",
+        "blockEmailContentExecution": "enabled",
+        "blockJavaScriptVbscriptExecution": "enabled",
+        "blockProcessCreation": "enabled",
+        "blockPsexecWmiChildProcess": "enabled",
+        "blockRawWriteToVolume": "enabled"
+      }
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000502",
+      "@odata.type": "#microsoft.graph.windows10EndpointProtectionConfiguration",
+      "displayName": "CMMC-Defender-AV",
+      "description": "Microsoft Defender Antivirus configuration for CMMC Level 2 compliance",
+      "createdDateTime": "2024-01-06T09:00:00Z",
+      "lastModifiedDateTime": "2024-01-06T09:00:00Z",
+      "defenderAllowOnAccessProtection": true,
+      "defenderAllowBehaviorMonitoring": true,
+      "defenderAllowCloudProtection": true,
+      "defenderAllowIntrusionPreventionSystem": true,
+      "defenderAllowNetworkProtection": true,
+      "defenderAllowRealTimeMonitoring": true,
+      "defenderAllowScanningNetworkFiles": true,
+      "defenderAllowScanningArchiveFiles": true,
+      "defenderAllowUserUIAccess": false,
+      "defenderBlockEndUserAccess": false,
+      "defenderCloudBlockLevel": "high",
+      "defenderCloudExtendedTimeout": 50,
+      "defenderDaysBeforeDeletingQuarantinedMalware": 90,
+      "defenderDisableBehaviorMonitoring": false,
+      "defenderDisableCloudProtection": false,
+      "defenderDisableIntrusionPreventionSystem": false,
+      "defenderDisableOnAccessProtection": false,
+      "defenderDisableRealTimeMonitoring": false,
+      "defenderMonitorFileActivity": "monitorAllFiles",
+      "defenderPotentiallyUnwantedAppAction": "block",
+      "defenderScanDirection": "monitorAllFiles",
+      "defenderScanDayOfWeek": "sunday",
+      "defenderScanTimeOfDay": "02:00:00.0000000",
+      "defenderScanType": "full"
+    }
+  ]
+}
