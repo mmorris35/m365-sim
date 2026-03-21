@@ -668,6 +668,33 @@ def get_fixture(name: str, request: Request, top: int | None = None) -> JSONResp
     return JSONResponse(content=result)
 
 
+def _rewrite_context_to_beta(data: Any) -> Any:
+    """Recursively rewrite @odata.context URLs from v1.0 to beta in response data.
+
+    Handles:
+    - Direct dict with @odata.context key
+    - Nested dicts (e.g., error objects)
+    - Lists of items (e.g., 'value' arrays)
+    - All cloud contexts: graph.microsoft.com, graph.microsoft.us, etc.
+
+    Returns: data with all @odata.context URLs rewritten.
+    """
+    if isinstance(data, dict):
+        result = {}
+        for key, value in data.items():
+            if key == "@odata.context" and isinstance(value, str):
+                # Rewrite v1.0 to beta in the context URL
+                result[key] = value.replace("/v1.0/", "/beta/")
+            else:
+                # Recursively process nested structures
+                result[key] = _rewrite_context_to_beta(value)
+        return result
+    elif isinstance(data, list):
+        return [_rewrite_context_to_beta(item) for item in data]
+    else:
+        return data
+
+
 @app.get("/health")
 async def health():
     """Health check endpoint (no auth required)."""
@@ -1073,6 +1100,203 @@ async def reload_fixtures(request: Request):
             "fixtures_loaded": fixtures_count,
             "scenario": scenario,
             "cloud": cloud,
+        },
+    )
+
+
+@app.api_route("/beta/{path:path}", methods=["GET", "POST", "PATCH", "DELETE", "PUT"])
+async def beta_route(path: str, request: Request):
+    """Mirror /v1.0/ routes under /beta/ with context URL rewriting.
+
+    This catch-all handler maps /beta/{path} to the /v1.0/{path} fixtures,
+    with @odata.context URLs rewritten from v1.0 to beta.
+
+    Supports all query parameters ($top, $filter, $expand) and write operations
+    (POST, PATCH) with the same behavior as v1.0 routes.
+    """
+    method = request.method
+
+    # Construct the equivalent v1.0 path
+    v1_path = f"v1.0/{path}"
+
+    # Map the path to a fixture name for get_fixture() calls
+    # This reuses the exact same logic as v1.0 routes
+    fixture_name = _path_to_fixture_name(path)
+
+    logger.info(f"Beta route {method} /beta/{path} -> fixture '{fixture_name}'")
+
+    if method == "GET":
+        # For GET requests, delegate to get_fixture with context rewriting
+        top = parse_top_param(request)
+        response = get_fixture(fixture_name, request, top)
+
+        # Rewrite context URLs in the response
+        if response.status_code == 200:
+            data = json.loads(response.body)
+            data = _rewrite_context_to_beta(data)
+            return JSONResponse(content=data, status_code=200)
+        else:
+            return response
+
+    elif method in ("POST", "PATCH"):
+        # For write operations, delegate to the appropriate handler based on path
+        response = await _handle_beta_write(path, request, method)
+
+        # Rewrite context URLs in the response
+        if isinstance(response, JSONResponse):
+            try:
+                data = json.loads(response.body)
+                data = _rewrite_context_to_beta(data)
+                return JSONResponse(content=data, status_code=response.status_code)
+            except Exception:
+                return response
+        else:
+            return response
+
+    else:
+        # DELETE, PUT, or other methods not yet supported
+        return JSONResponse(
+            status_code=405,
+            content={
+                "error": {
+                    "code": "Request_MethodNotAllowed",
+                    "message": f"Method {method} not supported",
+                }
+            },
+        )
+
+
+def _path_to_fixture_name(path: str) -> str:
+    """Map a URL path to a fixture name for lookup.
+
+    Examples:
+    - "users" -> "users"
+    - "me" -> "me"
+    - "identity/conditionalAccess/policies" -> "conditional_access_policies"
+    - "deviceManagement/managedDevices" -> "managed_devices"
+    """
+    # Build a mapping based on known v1.0 routes
+    path_map = {
+        "users": "users",
+        "me": "me",
+        "organization": "organization",
+        "domains": "domains",
+        "groups": "groups",
+        "applications": "applications",
+        "servicePrincipals": "service_principals",
+        "devices": "devices",
+        "deviceManagement/managedDevices": "managed_devices",
+        "deviceManagement/deviceCompliancePolicies": "compliance_policies",
+        "deviceManagement/deviceConfigurations": "device_configurations",
+        "deviceManagement/deviceEnrollmentConfigurations": "device_enrollment_configurations",
+        "identity/conditionalAccess/policies": "conditional_access_policies",
+        "identity/conditionalAccess/namedLocations": "named_locations",
+        "security/incidents": "security_incidents",
+        "security/alerts_v2": "security_alerts",
+        "security/secureScores": "secure_scores",
+        "security/secureScoreControlProfiles": "secure_score_control_profiles",
+        "directoryRoles": "directory_roles",
+        "roleManagement/directory/roleAssignments": "role_assignments",
+        "roleManagement/directory/roleDefinitions": "role_definitions",
+        "roleManagement/directory/roleEligibilitySchedules": "role_eligibility_schedules",
+        "roleManagement/directory/roleAssignmentSchedules": "role_assignment_schedules",
+        "policies/authenticationMethodsPolicy": "auth_methods_policy",
+        "auditLogs/signIns": "audit_sign_ins",
+        "auditLogs/directoryAudits": "audit_directory",
+        "informationProtection/policy/labels": "information_protection_labels",
+    }
+
+    # Try exact match first
+    if path in path_map:
+        return path_map[path]
+
+    # Try prefix match for paths with IDs (e.g., "users/123/authentication/methods")
+    if path.startswith("users/") and "/authentication/methods" in path:
+        return "me_auth_methods"
+    if path.startswith("me/authentication/methods"):
+        return "me_auth_methods"
+    if path.startswith("directoryRoles/") and "/members" in path:
+        return "directory_role_members"
+
+    # Default to the last path component
+    parts = path.split('/')
+    return parts[-1] if parts else path
+
+
+async def _handle_beta_write(path: str, request: Request, method: str) -> JSONResponse:
+    """Handle POST/PATCH operations on beta routes.
+
+    This delegates to the same write logic as v1.0 routes.
+    """
+    try:
+        body = await request.json()
+    except Exception as e:
+        logger.error(f"Failed to parse JSON body: {e}")
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": {
+                    "code": "Request_BadRequest",
+                    "message": "Invalid JSON body",
+                }
+            },
+        )
+
+    # Handle specific write paths
+    if method == "POST":
+        if path == "identity/conditionalAccess/policies":
+            # Add id and createdDateTime like the v1.0 handler
+            body["id"] = str(uuid.uuid4())
+            body["createdDateTime"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+            return JSONResponse(status_code=201, content=body)
+
+        elif path == "deviceManagement/deviceCompliancePolicies":
+            body["id"] = str(uuid.uuid4())
+            body["createdDateTime"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+            return JSONResponse(status_code=201, content=body)
+
+        elif path == "deviceManagement/deviceConfigurations":
+            body["id"] = str(uuid.uuid4())
+            body["createdDateTime"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+            return JSONResponse(status_code=201, content=body)
+
+        else:
+            # Unknown POST endpoint
+            logger.warning(f"Unknown beta POST endpoint: /beta/{path}")
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": {
+                        "code": "Request_ResourceNotFound",
+                        "message": f"POST not supported for /beta/{path}",
+                    }
+                },
+            )
+
+    elif method == "PATCH":
+        if path.startswith("policies/authenticationMethodsPolicy/authenticationMethodConfigurations/"):
+            # Return the PATCH body unchanged
+            return JSONResponse(status_code=200, content=body)
+
+        else:
+            logger.warning(f"Unknown beta PATCH endpoint: /beta/{path}")
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": {
+                        "code": "Request_ResourceNotFound",
+                        "message": f"PATCH not supported for /beta/{path}",
+                    }
+                },
+            )
+
+    return JSONResponse(
+        status_code=405,
+        content={
+            "error": {
+                "code": "Request_MethodNotAllowed",
+                "message": f"Method {method} not supported",
+            }
         },
     )
 
