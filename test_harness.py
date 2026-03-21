@@ -5,17 +5,19 @@ m365-sim Test Harness — Graph API Client Simulator
 Simulates a CMMC compliance assessment tool making real Microsoft Graph API
 calls against the mock server. Tests nine workflows:
 
-1.  ASSESS            — greenfield + hardened tenant posture
-2.  DEPLOY            — stateless write operations + error sim
-3.  STATEFUL          — deploy-then-assess with _reset
-4.  FILTER            — OData $filter engine (eq, compound, etc.)
-5.  CLOUD             — GCC High + Commercial E5 cloud targets
-6.  MOCK-CLOUD        — X-Mock-Cloud header override
-7.  EXTENDED-FILTER   — ne, gt, lt, ge, le, startswith, contains, or
-8.  PARTIAL           — mid-deployment scenario posture
-9.  AUTH              — Bearer-only enforcement + error sim edge cases
-10. EXPAND            — $expand inline resource expansion
+1.  ASSESS             — greenfield + hardened tenant posture
+2.  DEPLOY             — stateless write operations + error sim
+3.  STATEFUL           — deploy-then-assess with _reset
+4.  FILTER             — OData $filter engine (eq, compound, etc.)
+5.  CLOUD              — GCC High + Commercial E5 cloud targets
+6.  MOCK-CLOUD         — X-Mock-Cloud header override
+7.  EXTENDED-FILTER    — ne, gt, lt, ge, le, startswith, contains, or
+8.  PARTIAL            — mid-deployment scenario posture
+9.  AUTH               — Bearer-only enforcement + error sim edge cases
+10. EXPAND             — $expand inline resource expansion
 11. GCC-HIGH-SCENARIOS — GCC High hardened + partial posture
+12. BETA               — /beta/ route mirror with context URL rewriting
+13. E5-SCENARIOS       — Commercial E5 hardened + partial posture
 
 Usage:
     python test_harness.py                             # run all workflows
@@ -1056,6 +1058,175 @@ def test_gcc_high_scenarios() -> list[tuple[str, bool, str]]:
     return results
 
 
+# ---------------------------------------------------------------------------
+# Beta API endpoint tests — /beta/ route mirror with context rewriting
+# ---------------------------------------------------------------------------
+
+def test_beta_endpoints(client: GraphClient) -> list[tuple[str, bool, str]]:
+    """Test /beta/ route mirror with @odata.context URL rewriting."""
+    results = []
+
+    # GET /beta/users — context rewritten to beta
+    r = client.get("/beta/users")
+    data = r.json()
+    context = data.get("@odata.context", "")
+    results.append(("/beta/users returns 200", r.status_code == 200,
+                     f"status={r.status_code}"))
+    results.append(("/beta/users context uses /beta/", "/beta/" in context and "/v1.0/" not in context,
+                     f"context={context[:65]}"))
+
+    # GET /beta/me — singleton with beta context
+    r = client.get("/beta/me")
+    me = r.json()
+    me_ctx = me.get("@odata.context", "")
+    results.append(("/beta/me singleton with beta context",
+                     r.status_code == 200 and "/beta/" in me_ctx,
+                     f"displayName={me.get('displayName')}, context={me_ctx[:65]}"))
+
+    # POST /beta/identity/conditionalAccess/policies — write works
+    r = client.post("/beta/identity/conditionalAccess/policies", {
+        "displayName": "Beta-Test-Policy",
+        "state": "enabledForReportingButNotEnforced",
+    })
+    results.append(("/beta/ POST CA policy -> 201", r.status_code == 201,
+                     f"status={r.status_code}, id={r.json().get('id', '?')[:8]}..."))
+
+    # PATCH /beta/ auth method
+    r = client.patch(
+        "/beta/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/fido2",
+        {"state": "enabled"})
+    results.append(("/beta/ PATCH auth method -> 200", r.status_code == 200,
+                     f"status={r.status_code}"))
+
+    # $filter on /beta/
+    r = client.get("/beta/users", params={"$filter": "userType eq 'Member'"})
+    filtered = r.json().get("value", [])
+    results.append(("/beta/ $filter works", len(filtered) == 2,
+                     f"{len(filtered)} results"))
+
+    # $top on /beta/
+    r = client.get("/beta/users", params={"$top": "1"})
+    topped = r.json().get("value", [])
+    results.append(("/beta/ $top works", len(topped) == 1,
+                     f"{len(topped)} result"))
+
+    # $expand on /beta/
+    r = client.get("/beta/users", params={"$expand": "memberOf"})
+    expanded = r.json().get("value", [])
+    has_expand = all("memberOf" in u for u in expanded)
+    results.append(("/beta/ $expand works", has_expand,
+                     f"all have memberOf={has_expand}"))
+
+    # Error sim on /beta/
+    r = client.get("/beta/users", params={"mock_status": "429"})
+    results.append(("/beta/ error sim 429", r.status_code == 429,
+                     f"status={r.status_code}, Retry-After={r.headers.get('retry-after')}"))
+
+    # Unmapped /beta/ path -> 404
+    r = client.get("/beta/nonexistent/path")
+    results.append(("/beta/ unmapped path -> 404", r.status_code == 404,
+                     f"status={r.status_code}"))
+
+    return results
+
+
+# ---------------------------------------------------------------------------
+# Commercial E5 scenarios — hardened + partial posture
+# ---------------------------------------------------------------------------
+
+def test_e5_scenarios() -> list[tuple[str, bool, str]]:
+    """Test Commercial E5 hardened and partial scenarios."""
+    results = []
+
+    # --- Hardened ---
+    port_h = get_free_port()
+    proc_h = start_server(port_h, "hardened", cloud="commercial-e5")
+    try:
+        client = GraphClient(f"http://localhost:{port_h}")
+
+        # Health check
+        r = client.get("/health")
+        health = r.json()
+        results.append(("E5 hardened: health",
+                         health.get("cloud") == "commercial-e5" and health.get("scenario") == "hardened",
+                         f"cloud={health.get('cloud')}, scenario={health.get('scenario')}"))
+
+        # 8 CA policies, all report-only
+        policies = client.get_ca_policies()
+        all_report_only = all(p.get("state") == "enabledForReportingButNotEnforced" for p in policies)
+        results.append(("E5 hardened: 8 report-only CA policies",
+                         len(policies) == 8 and all_report_only,
+                         f"{len(policies)} policies, all report-only={all_report_only}"))
+
+        # Break-glass excluded
+        all_excluded = all(
+            BREAKGLASS_ID in (p.get("conditions") or {}).get("users", {}).get("excludeUsers", [])
+            for p in policies
+        )
+        results.append(("E5 hardened: break-glass excluded", all_excluded,
+                         f"all exclude break-glass={all_excluded}"))
+
+        # Org is Contoso Corp (not Defense LLC)
+        org = client.get_organization()
+        org_name = org[0].get("displayName", "") if org else ""
+        results.append(("E5 hardened: org is Contoso Corp",
+                         org_name == "Contoso Corp",
+                         f"displayName={org_name}"))
+
+        # 3 compliant devices
+        devices = client.get_managed_devices()
+        all_compliant = all(d.get("complianceState") == "compliant" for d in devices)
+        results.append(("E5 hardened: 3 compliant devices",
+                         len(devices) == 3 and all_compliant,
+                         f"{len(devices)} devices, all compliant={all_compliant}"))
+
+        # Uses graph.microsoft.com
+        r = client.get("/v1.0/users")
+        context = r.json().get("@odata.context", "")
+        results.append(("E5 hardened: graph.microsoft.com URL",
+                         "graph.microsoft.com" in context,
+                         f"context={context[:60]}"))
+    finally:
+        stop_server(proc_h)
+
+    # --- Partial ---
+    port_p = get_free_port()
+    proc_p = start_server(port_p, "partial", cloud="commercial-e5")
+    try:
+        client = GraphClient(f"http://localhost:{port_p}")
+
+        # 3 CA policies
+        policies = client.get_ca_policies()
+        results.append(("E5 partial: 3 CA policies",
+                         len(policies) == 3,
+                         f"{len(policies)} policies"))
+
+        # 1 auth method enabled
+        auth = client.get_auth_methods_policy()
+        configs = auth.get("authenticationMethodConfigurations", [])
+        enabled = [c for c in configs if c.get("state") == "enabled"]
+        results.append(("E5 partial: 1 auth method enabled",
+                         len(enabled) == 1,
+                         f"{len(enabled)} enabled: {[c.get('id') for c in enabled]}"))
+
+        # 1 device
+        devices = client.get_managed_devices()
+        results.append(("E5 partial: 1 device",
+                         len(devices) == 1,
+                         f"{len(devices)} device(s)"))
+
+        # Org is still Contoso Corp
+        org = client.get_organization()
+        org_name = org[0].get("displayName", "") if org else ""
+        results.append(("E5 partial: org is Contoso Corp",
+                         org_name == "Contoso Corp",
+                         f"displayName={org_name}"))
+    finally:
+        stop_server(proc_p)
+
+    return results
+
+
 def print_results(title: str, results: list[tuple[str, bool, str]]):
     print(f"\n{'=' * 70}")
     print(f"  {title}")
@@ -1124,7 +1295,8 @@ def main():
                         choices=["assess", "deploy", "stateful", "filter",
                                  "cloud", "mock-cloud", "extended-filter",
                                  "partial", "auth", "expand",
-                                 "gcc-high-scenarios", "all"],
+                                 "gcc-high-scenarios", "beta",
+                                 "e5-scenarios", "all"],
                         default="all")
     parser.add_argument("--port", type=int, default=0, help="Port (0 = auto)")
     args = parser.parse_args()
@@ -1278,6 +1450,26 @@ def main():
             gcc_high_results = test_gcc_high_scenarios()
             print_results("GCC High Scenarios — Hardened + Partial", gcc_high_results)
             if not all(ok for _, ok, _ in gcc_high_results):
+                all_ok = False
+
+        # ---- BETA ENDPOINTS workflow ----
+        if args.workflow in ("beta", "all"):
+            print("\nStarting greenfield server for /beta/ tests...")
+            proc = start_server(ports[0], "greenfield")
+            procs.append(proc)
+            client = GraphClient(f"http://localhost:{ports[0]}")
+            beta_results = test_beta_endpoints(client)
+            print_results("/beta/ Route Mirror + Context Rewriting", beta_results)
+            stop_server(proc); procs.remove(proc)
+            if not all(ok for _, ok, _ in beta_results):
+                all_ok = False
+
+        # ---- COMMERCIAL E5 SCENARIOS workflow ----
+        if args.workflow in ("e5-scenarios", "all"):
+            print("\nTesting Commercial E5 hardened and partial scenarios...")
+            e5_results = test_e5_scenarios()
+            print_results("Commercial E5 Scenarios — Hardened + Partial", e5_results)
+            if not all(ok for _, ok, _ in e5_results):
                 all_ok = False
 
     finally:
