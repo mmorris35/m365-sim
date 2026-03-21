@@ -43,8 +43,12 @@ Use the m365-sim-executor agent to execute subtask X.Y.Z
 - [x] Phase 20 — Commercial E5 Hardened and Partial Scenarios
 - [x] Phase 21 — Beta API Endpoints
 
-**Current**: Phase 21 (COMPLETE)
-**Next**: All phases implemented
+- [ ] Phase 22 — Enforced Scenario (Issue #1)
+- [ ] Phase 23 — Priority 1 Endpoints (Issue #1)
+- [ ] Phase 24 — Beta-Specific Fixtures (Issue #1)
+
+**Current**: Phase 22
+**Next**: 22.1.1
 
 ---
 
@@ -3036,6 +3040,281 @@ git add -A && git commit -m "test(beta): /beta/ endpoint mirror tests [21.1.2]"
 
 ### Task 21.1 Complete — Squash Merge
 - [x] Squash merge to main, push, clean up
+
+---
+
+## Phase 22: Enforced Scenario (Issue #1, Request 1)
+
+**Goal**: Add a `hardened-enforced` scenario where all 8 CA policies have `state: "enabled"` instead of `enabledForReportingButNotEnforced`. SallyPort evaluators require `enabled` to count as Verified.
+**Duration**: 1 session
+**Issue**: https://github.com/mmorris35/m365-sim/issues/1
+
+### Task 22.1: Enforced Scenario Fixtures and Tests
+
+**Git**: Create branch `feature/22-1-enforced-scenario` when starting first subtask.
+
+**Subtask 22.1.1: Enforced Scenario Fixtures (Single Session)**
+
+**Prerequisites**:
+- [x] 21.1.2: Beta Endpoint Tests
+
+**Git Start**:
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/22-1-enforced-scenario
+```
+
+**Deliverables**:
+- [ ] Create `scenarios/gcc-moderate/hardened-enforced/` by copying `hardened/` and changing all CA policy `state` values from `enabledForReportingButNotEnforced` to `enabled`
+- [ ] All other hardened fixtures (auth_methods_policy, me_auth_methods, managed_devices, compliance_policies, device_configurations) stay identical
+- [ ] Verify `python server.py --scenario hardened-enforced` starts and serves fixtures
+- [ ] Repeat for `scenarios/gcc-high/hardened-enforced/` (copy from `gcc-high/hardened/`, set state to `enabled`)
+- [ ] Repeat for `scenarios/commercial-e5/hardened-enforced/` (copy from `commercial-e5/hardened/`, set state to `enabled`)
+
+**Success Criteria**:
+- [ ] Server starts with `--scenario hardened-enforced` for all 3 cloud targets
+- [ ] CA policies have `state: "enabled"` (not `enabledForReportingButNotEnforced`)
+- [ ] All existing tests still pass
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(enforced): hardened-enforced scenario with enabled CA policies [22.1.1]"
+```
+
+---
+
+**Subtask 22.1.2: Enforced Scenario Tests (Single Session)**
+
+**Prerequisites**:
+- [x] 22.1.1: Enforced Scenario Fixtures
+
+**Deliverables**:
+- [ ] Create `tests/test_enforced.py` with 10+ tests:
+  - CA policy count is 8
+  - ALL 8 policies have `state: "enabled"` (not report-only)
+  - Break-glass still excluded from all 8
+  - Auth methods same as hardened (FIDO2 + Authenticator + TAP enabled)
+  - Managed devices same as hardened (3 compliant)
+  - Org identity unchanged
+  - GCC High enforced uses `graph.microsoft.us`
+  - Commercial E5 enforced uses `contoso.com`
+- [ ] All existing tests still pass
+
+**Success Criteria**:
+- [ ] `pytest tests/test_enforced.py -v` all green
+- [ ] `pytest tests/ -v` — ALL tests pass
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(enforced): hardened-enforced scenario tests [22.1.2]"
+```
+
+---
+
+### Task 22.1 Complete — Squash Merge
+- [ ] Squash merge to main, push, clean up
+
+---
+
+## Phase 23: Priority 1 Endpoints (Issue #1, Request 2a)
+
+**Goal**: Add 9 high-impact Graph API endpoints that would unlock 50+ CMMC objectives in SallyPort evaluator testing.
+**Duration**: 2 sessions
+**Issue**: https://github.com/mmorris35/m365-sim/issues/1
+
+### Task 23.1: Endpoint Routes and Fixtures
+
+**Git**: Create branch `feature/23-1-priority-endpoints` when starting first subtask.
+
+**Subtask 23.1.1: Priority 1 Endpoint Routes and Greenfield Fixtures (Single Session)**
+
+**Prerequisites**:
+- [x] 22.1.2: Enforced Scenario Tests
+
+**Git Start**:
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/23-1-priority-endpoints
+```
+
+**Deliverables**:
+- [ ] Add 9 new GET routes to `server.py`:
+  - `GET /v1.0/policies/authorizationPolicy` — singleton: guest access settings, SSPR config
+  - `GET /v1.0/subscribedSkus` — array: license inventory (E3/E5/GCC SKUs)
+  - `GET /v1.0/reports/authenticationMethods/usersRegisteredByMethod` — singleton: MFA registration summary
+  - `GET /v1.0/identityGovernance/accessReviews/definitions` — array: access review configurations
+  - `GET /v1.0/deviceAppManagement/managedAppPolicies` — array: app protection policies
+  - `GET /v1.0/deviceAppManagement/mobileApps` — array: deployed app inventory
+  - `GET /v1.0/deviceManagement/detectedApps` — array: installed software inventory
+  - `GET /v1.0/auditLogs/provisioning` — array: provisioning event logs
+  - `GET /v1.0/security/alerts` — array: legacy v1 security alerts
+- [ ] Create greenfield fixtures for each in `scenarios/gcc-moderate/greenfield/`:
+  - `authorization_policy.json` — singleton with guest invite restrictions, SSPR disabled
+  - `subscribed_skus.json` — G5 GCC SKU with consumed/prepaid units
+  - `users_registered_by_method.json` — registration stats showing low MFA adoption
+  - `access_review_definitions.json` — empty (no reviews configured in greenfield)
+  - `managed_app_policies.json` — empty (no app protection policies)
+  - `mobile_apps.json` — empty (no managed apps deployed)
+  - `detected_apps.json` — empty (no device inventory)
+  - `provisioning_logs.json` — empty (no provisioning events)
+  - `security_alerts_v1.json` — empty (no legacy alerts)
+- [ ] All fixtures must include `@odata.context` matching real Graph API responses
+- [ ] Update `_path_to_fixture_name()` in beta route handler for new endpoints
+- [ ] Verify all new endpoints return 200 with auth
+
+**Success Criteria**:
+- [ ] All 9 new endpoints return 200 with correct fixture data
+- [ ] All existing tests still pass
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(endpoints): 9 priority-1 Graph API endpoints with greenfield fixtures [23.1.1]"
+```
+
+---
+
+**Subtask 23.1.2: Hardened and Enforced Fixtures for New Endpoints (Single Session)**
+
+**Prerequisites**:
+- [x] 23.1.1: Priority 1 Endpoint Routes
+
+**Deliverables**:
+- [ ] Create hardened-specific fixtures where posture changes from greenfield:
+  - `authorization_policy.json` — guest invites restricted, SSPR enabled
+  - `subscribed_skus.json` — same SKU (inherited from greenfield is fine)
+  - `users_registered_by_method.json` — high MFA registration (all users enrolled)
+  - `access_review_definitions.json` — 2 active reviews (privileged roles, guest access)
+  - `managed_app_policies.json` — 3 app protection policies (iOS, Android, Windows)
+  - `mobile_apps.json` — 5 managed apps (Outlook, Teams, OneDrive, Authenticator, Company Portal)
+  - `detected_apps.json` — 10 detected apps across managed devices
+- [ ] Add these to `scenarios/gcc-moderate/hardened/` and `scenarios/gcc-moderate/hardened-enforced/`
+- [ ] Copy/adapt for `gcc-high` and `commercial-e5` hardened and hardened-enforced scenarios
+- [ ] Greenfield fixtures that are empty stay inherited (no override needed)
+
+**Success Criteria**:
+- [ ] Hardened and enforced scenarios show improved posture for new endpoints
+- [ ] All existing tests still pass
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(endpoints): hardened/enforced fixtures for priority-1 endpoints [23.1.2]"
+```
+
+---
+
+**Subtask 23.1.3: Priority 1 Endpoint Tests (Single Session)**
+
+**Prerequisites**:
+- [x] 23.1.2: Hardened and Enforced Fixtures
+
+**Deliverables**:
+- [ ] Create `tests/test_priority_endpoints.py` with 15+ tests:
+  - Each new endpoint returns 200 with correct shape
+  - Greenfield vs hardened posture differences verified
+  - $top works on collection endpoints
+  - $filter works on at least 2 new endpoints
+  - /beta/ mirror works for new endpoints
+- [ ] All existing tests still pass
+
+**Success Criteria**:
+- [ ] `pytest tests/test_priority_endpoints.py -v` all green
+- [ ] `pytest tests/ -v` — ALL tests pass
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(endpoints): priority-1 endpoint tests [23.1.3]"
+```
+
+---
+
+### Task 23.1 Complete — Squash Merge
+- [ ] Squash merge to main, push, clean up
+
+---
+
+## Phase 24: Beta-Specific Fixtures (Issue #1, Request 2b)
+
+**Goal**: Add beta-specific fixtures for 13 endpoints that return extended properties not available in v1.0. The existing `/beta/` catch-all already routes these — this phase adds fixtures so they return meaningful data instead of 404.
+**Duration**: 1 session
+**Issue**: https://github.com/mmorris35/m365-sim/issues/1
+
+### Task 24.1: Beta Fixture Overrides
+
+**Git**: Create branch `feature/24-1-beta-fixtures` when starting first subtask.
+
+**Subtask 24.1.1: Beta Fixture Files and Route Updates (Single Session)**
+
+**Prerequisites**:
+- [x] 23.1.3: Priority 1 Endpoint Tests
+
+**Git Start**:
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/24-1-beta-fixtures
+```
+
+**Deliverables**:
+- [ ] Create `scenarios/gcc-moderate/greenfield/beta/` directory for beta-specific overrides
+- [ ] Add beta fixture files with extended properties:
+  - `managed_devices.json` — v1.0 fields + `windowsMalwareProtection`, `wdagEnabled`, `bitLockerStatus`, `tpmVersion`
+  - `compliance_policies.json` — v1.0 fields + `assignments`, `scheduledActionsForRule`
+  - `device_configurations.json` — v1.0 fields + `omaSettings` array for OMA-URI profiles
+  - `conditional_access_policies.json` — v1.0 fields + `sessionControls.cloudAppSecurity`, `grantControls.authenticationStrength`
+  - `risk_detections.json` — identity protection risk events (empty greenfield, populated hardened)
+  - `attack_simulations.json` — phishing simulation results (empty greenfield)
+  - `attack_trainings.json` — security training completion (empty greenfield)
+  - `device_health_scripts.json` — proactive remediations (empty greenfield)
+  - `intents.json` — security baseline intents (empty greenfield)
+  - `group_policy_configurations.json` — GPO configurations (empty greenfield)
+  - `remote_action_audits.json` — remote device action logs (empty greenfield)
+  - `beta_mobile_apps.json` — beta app inventory with extended properties (empty greenfield)
+  - `beta_secure_scores.json` — extended secure score with control category breakdown
+- [ ] Update `/beta/` route handler to check for beta-specific fixtures before falling back to v1.0 fixtures
+- [ ] Update `_path_to_fixture_name()` for new beta paths
+- [ ] Create hardened beta overrides for endpoints with posture-dependent data (risk_detections, attack_simulations, device_health_scripts, intents)
+
+**Success Criteria**:
+- [ ] `/beta/deviceManagement/managedDevices` returns extended device properties
+- [ ] `/beta/identityProtection/riskDetections` returns 200
+- [ ] All v1.0 behavior unchanged
+- [ ] All existing tests pass
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(beta): beta-specific fixtures with extended properties [24.1.1]"
+```
+
+---
+
+**Subtask 24.1.2: Beta Fixture Tests (Single Session)**
+
+**Prerequisites**:
+- [x] 24.1.1: Beta Fixture Files
+
+**Deliverables**:
+- [ ] Create `tests/test_beta_fixtures.py` with 12+ tests:
+  - Beta managed devices have extended properties (bitLockerStatus, tpmVersion)
+  - Beta CA policies have authenticationStrength
+  - Beta risk detections returns 200
+  - Beta attack simulations returns 200
+  - Each new beta endpoint returns correct shape
+  - V1.0 endpoints still return standard properties (no beta fields)
+  - Hardened beta fixtures show populated data
+- [ ] All existing tests still pass
+
+**Success Criteria**:
+- [ ] `pytest tests/test_beta_fixtures.py -v` all green
+- [ ] `pytest tests/ -v` — ALL tests pass
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(beta): beta-specific fixture tests [24.1.2]"
+```
+
+---
+
+### Task 24.1 Complete — Squash Merge
+- [ ] Squash merge to main, push, clean up
 
 ---
 
