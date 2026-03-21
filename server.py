@@ -957,6 +957,68 @@ async def get_info_protection_labels(request: Request):
     return get_fixture("information_protection_labels", request, top)
 
 
+# Subtask 23.1.1: Priority 1 Endpoints
+@app.get("/v1.0/policies/authorizationPolicy")
+async def get_authorization_policy(request: Request):
+    """GET /v1.0/policies/authorizationPolicy — return authorization_policy fixture."""
+    return get_fixture("authorization_policy", request)
+
+
+@app.get("/v1.0/subscribedSkus")
+async def get_subscribed_skus(request: Request):
+    """GET /v1.0/subscribedSkus — return subscribed_skus fixture."""
+    top = parse_top_param(request)
+    return get_fixture("subscribed_skus", request, top)
+
+
+@app.get("/v1.0/reports/authenticationMethods/usersRegisteredByMethod")
+async def get_users_registered_by_method(request: Request):
+    """GET /v1.0/reports/authenticationMethods/usersRegisteredByMethod — return users_registered_by_method fixture."""
+    return get_fixture("users_registered_by_method", request)
+
+
+@app.get("/v1.0/identityGovernance/accessReviews/definitions")
+async def get_access_review_definitions(request: Request):
+    """GET /v1.0/identityGovernance/accessReviews/definitions — return access_review_definitions fixture."""
+    top = parse_top_param(request)
+    return get_fixture("access_review_definitions", request, top)
+
+
+@app.get("/v1.0/deviceAppManagement/managedAppPolicies")
+async def get_managed_app_policies(request: Request):
+    """GET /v1.0/deviceAppManagement/managedAppPolicies — return managed_app_policies fixture."""
+    top = parse_top_param(request)
+    return get_fixture("managed_app_policies", request, top)
+
+
+@app.get("/v1.0/deviceAppManagement/mobileApps")
+async def get_mobile_apps(request: Request):
+    """GET /v1.0/deviceAppManagement/mobileApps — return mobile_apps fixture."""
+    top = parse_top_param(request)
+    return get_fixture("mobile_apps", request, top)
+
+
+@app.get("/v1.0/deviceManagement/detectedApps")
+async def get_detected_apps(request: Request):
+    """GET /v1.0/deviceManagement/detectedApps — return detected_apps fixture."""
+    top = parse_top_param(request)
+    return get_fixture("detected_apps", request, top)
+
+
+@app.get("/v1.0/auditLogs/provisioning")
+async def get_provisioning_logs(request: Request):
+    """GET /v1.0/auditLogs/provisioning — return provisioning_logs fixture."""
+    top = parse_top_param(request)
+    return get_fixture("provisioning_logs", request, top)
+
+
+@app.get("/v1.0/security/alerts")
+async def get_security_alerts_v1(request: Request):
+    """GET /v1.0/security/alerts — return security_alerts_v1 fixture."""
+    top = parse_top_param(request)
+    return get_fixture("security_alerts_v1", request, top)
+
+
 # Subtask 3.2.1: POST and PATCH Write Stubs
 @app.post("/v1.0/identity/conditionalAccess/policies")
 async def post_ca_policy(request: Request):
@@ -1204,6 +1266,15 @@ def _path_to_fixture_name(path: str) -> str:
         "auditLogs/signIns": "audit_sign_ins",
         "auditLogs/directoryAudits": "audit_directory",
         "informationProtection/policy/labels": "information_protection_labels",
+        "policies/authorizationPolicy": "authorization_policy",
+        "subscribedSkus": "subscribed_skus",
+        "reports/authenticationMethods/usersRegisteredByMethod": "users_registered_by_method",
+        "identityGovernance/accessReviews/definitions": "access_review_definitions",
+        "deviceAppManagement/managedAppPolicies": "managed_app_policies",
+        "deviceAppManagement/mobileApps": "mobile_apps",
+        "deviceManagement/detectedApps": "detected_apps",
+        "auditLogs/provisioning": "provisioning_logs",
+        "security/alerts": "security_alerts_v1",
     }
 
     # Try exact match first

@@ -1,0 +1,42 @@
+{
+  "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#subscribedSkus",
+  "value": [
+    {
+      "id": "sku_G5_001",
+      "skuPartNumber": "O365_GOVERNMENT_G5",
+      "servicePlans": [
+        {
+          "servicePlanId": "871d91ec-ec1a-452b-a83f-bd76c7d770ef",
+          "servicePlanName": "DEFENDER_ENDPOINT_1",
+          "provisioningStatus": "Success",
+          "appliesTo": "User"
+        },
+        {
+          "servicePlanId": "c1ec4a95-1f05-45b3-a911-aa3fa01094f5",
+          "servicePlanName": "THREAT_INTELLIGENCE",
+          "provisioningStatus": "Success",
+          "appliesTo": "User"
+        },
+        {
+          "servicePlanId": "41781fb2-bc02-4b7c-bd55-b576c07bb09d",
+          "servicePlanName": "AAD_PREMIUM",
+          "provisioningStatus": "Success",
+          "appliesTo": "User"
+        },
+        {
+          "servicePlanId": "efb87545-963c-4e0d-99df-69c6916d9eb0",
+          "servicePlanName": "EXCHANGE_S_FOUNDATION",
+          "provisioningStatus": "Success",
+          "appliesTo": "User"
+        }
+      ],
+      "capabilityStatus": "Enabled",
+      "consumedUnits": 5,
+      "prepaidUnits": {
+        "enabled": 10,
+        "suspended": 0,
+        "warning": 0
+      }
+    }
+  ]
+}

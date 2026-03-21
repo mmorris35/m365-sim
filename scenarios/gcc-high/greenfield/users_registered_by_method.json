@@ -1,0 +1,41 @@
+{
+  "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#reports/authenticationMethods/usersRegisteredByMethod/$entity",
+  "id": "AuthenticationMethodsUsersRegisteredByMethod",
+  "userRegistrationDetails": [
+    {
+      "id": "mobilePhone",
+      "totalUserCount": 2,
+      "userRegistrationCount": 0
+    },
+    {
+      "id": "microsoftAuthenticator",
+      "totalUserCount": 2,
+      "userRegistrationCount": 1
+    },
+    {
+      "id": "fido2",
+      "totalUserCount": 2,
+      "userRegistrationCount": 0
+    },
+    {
+      "id": "windowsHelloForBusiness",
+      "totalUserCount": 2,
+      "userRegistrationCount": 0
+    },
+    {
+      "id": "password",
+      "totalUserCount": 2,
+      "userRegistrationCount": 2
+    },
+    {
+      "id": "temporaryAccessPass",
+      "totalUserCount": 2,
+      "userRegistrationCount": 0
+    },
+    {
+      "id": "email",
+      "totalUserCount": 2,
+      "userRegistrationCount": 0
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#identityGovernance/accessReviews/definitions",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000401",
+      "displayName": "Privileged Roles Access Review",
+      "description": "Quarterly review of privileged role assignments (Global Admin, Security Admin)",
+      "status": "Active",
+      "createdDateTime": "2024-06-15T10:00:00Z",
+      "lastModifiedDateTime": "2025-03-19T14:30:00Z",
+      "startDate": "2025-03-20T00:00:00Z",
+      "endDate": "2025-04-20T00:00:00Z",
+      "instanceEnumerationScope": {
+        "query": "/identityGovernance/accessReviews/definitions('00000000-0000-0000-0000-000000000401')/instances",
+        "queryType": "MicrosoftGraph"
+      },
+      "reviewers": [
+        {
+          "query": "/users/8a4f82ec-2c1a-4cc8-b5b7-96a00a2a6000",
+          "queryType": "MicrosoftGraph"
+        }
+      ],
+      "fallbackReviewers": [],
+      "scope": {
+        "query": "/directoryObjects/getByIds(ids=['62e90394-69f5-4237-9190-012177145e10','194ae4cb-b126-40b2-bd5b-6091b380977d'])",
+        "queryType": "MicrosoftGraph"
+      },
+      "settings": {
+        "mailNotificationsEnabled": true,
+        "reminderNotificationsEnabled": true,
+        "justificationRequiredOnApproval": true,
+        "autoApplyDecisionsEnabled": false,
+        "autoReviewEnabled": false,
+        "accessRecommendationsEnabled": true,
+        "recurrenceSettings": {
+          "pattern": {
+            "type": "absoluteMonthly",
+            "interval": 3,
+            "month": 0,
+            "dayOfMonth": 20,
+            "firstDayOfWeek": "sunday",
+            "daysOfWeek": []
+          },
+          "range": {
+            "type": "endDate",
+            "numberOfOccurrences": 0,
+            "recurrenceTimeZone": "UTC",
+            "startDate": "2025-03-20",
+            "endDate": "2026-12-31"
+          }
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000402",
+      "displayName": "Guest Access Review",
+      "description": "Monthly review of guest user access to sensitive resources",
+      "status": "Active",
+      "createdDateTime": "2024-07-01T09:00:00Z",
+      "lastModifiedDateTime": "2025-03-19T14:30:00Z",
+      "startDate": "2025-03-21T00:00:00Z",
+      "endDate": "2025-04-21T00:00:00Z",
+      "instanceEnumerationScope": {
+        "query": "/identityGovernance/accessReviews/definitions('00000000-0000-0000-0000-000000000402')/instances",
+        "queryType": "MicrosoftGraph"
+      },
+      "reviewers": [
+        {
+          "query": "/users/8a4f82ec-2c1a-4cc8-b5b7-96a00a2a6000",
+          "queryType": "MicrosoftGraph"
+        }
+      ],
+      "fallbackReviewers": [
+        {
+          "query": "/users/8a4f82ec-2c1a-4cc8-b5b7-96a00a2a6001",
+          "queryType": "MicrosoftGraph"
+        }
+      ],
+      "scope": {
+        "query": "/users?$filter=userType eq 'Guest'",
+        "queryType": "MicrosoftGraph"
+      },
+      "settings": {
+        "mailNotificationsEnabled": true,
+        "reminderNotificationsEnabled": true,
+        "justificationRequiredOnApproval": true,
+        "autoApplyDecisionsEnabled": false,
+        "autoReviewEnabled": false,
+        "accessRecommendationsEnabled": true,
+        "recurrenceSettings": {
+          "pattern": {
+            "type": "absoluteMonthly",
+            "interval": 1,
+            "month": 0,
+            "dayOfMonth": 21,
+            "firstDayOfWeek": "sunday",
+            "daysOfWeek": []
+          },
+          "range": {
+            "type": "endDate",
+            "numberOfOccurrences": 0,
+            "recurrenceTimeZone": "UTC",
+            "startDate": "2025-03-21",
+            "endDate": "2026-12-31"
+          }
+        }
+      }
+    }
+  ]
+}

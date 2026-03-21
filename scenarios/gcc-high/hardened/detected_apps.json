@@ -1,0 +1,95 @@
+{
+  "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#deviceManagement/detectedApps",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000701",
+      "displayName": "Microsoft Edge",
+      "version": "123.0.2420.81",
+      "sizeInByte": 285000000,
+      "deviceCount": 3,
+      "publisher": "Microsoft Corporation",
+      "platform": "Windows"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000702",
+      "displayName": "Microsoft Defender",
+      "version": "1.401.0",
+      "sizeInByte": 750000000,
+      "deviceCount": 3,
+      "publisher": "Microsoft Corporation",
+      "platform": "Windows"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000703",
+      "displayName": "Microsoft Office 365",
+      "version": "16.87.23011001",
+      "sizeInByte": 3200000000,
+      "deviceCount": 3,
+      "publisher": "Microsoft Corporation",
+      "platform": "Windows"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000704",
+      "displayName": "Windows Firewall",
+      "version": "11.0",
+      "sizeInByte": 125000000,
+      "deviceCount": 2,
+      "publisher": "Microsoft Corporation",
+      "platform": "Windows"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000705",
+      "displayName": "7-Zip",
+      "version": "23.01",
+      "sizeInByte": 3200000,
+      "deviceCount": 1,
+      "publisher": "Igor Pavlov",
+      "platform": "Windows"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000706",
+      "displayName": "Adobe Acrobat Reader",
+      "version": "24.001.20629",
+      "sizeInByte": 185000000,
+      "deviceCount": 2,
+      "publisher": "Adobe Systems Incorporated",
+      "platform": "Windows"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000707",
+      "displayName": "Cisco Anyconnect VPN",
+      "version": "4.10.7010",
+      "sizeInByte": 310000000,
+      "deviceCount": 2,
+      "publisher": "Cisco Systems",
+      "platform": "Windows"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000708",
+      "displayName": "Google Chrome",
+      "version": "123.0.6312.120",
+      "sizeInByte": 250000000,
+      "deviceCount": 1,
+      "publisher": "Google LLC",
+      "platform": "Windows"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000709",
+      "displayName": "Apple iTunes",
+      "version": "12.14.1.2",
+      "sizeInByte": 520000000,
+      "deviceCount": 1,
+      "publisher": "Apple Inc.",
+      "platform": "Windows"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000710",
+      "displayName": "SSH Client (OpenSSH)",
+      "version": "8.9p1",
+      "sizeInByte": 85000000,
+      "deviceCount": 2,
+      "publisher": "OpenSSH",
+      "platform": "Windows"
+    }
+  ]
+}

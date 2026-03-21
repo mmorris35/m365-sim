@@ -44,11 +44,11 @@ Use the m365-sim-executor agent to execute subtask X.Y.Z
 - [x] Phase 21 — Beta API Endpoints
 
 - [x] Phase 22 — Enforced Scenario (Issue #1)
-- [ ] Phase 23 — Priority 1 Endpoints (Issue #1)
+- [x] Phase 23 — Priority 1 Endpoints (Issue #1)
 - [ ] Phase 24 — Beta-Specific Fixtures (Issue #1)
 
-**Current**: Phase 23
-**Next**: 23.1.1
+**Current**: Phase 24
+**Next**: 24.1.1
 
 ---
 
@@ -3159,7 +3159,7 @@ git checkout -b feature/23-1-priority-endpoints
 ```
 
 **Deliverables**:
-- [ ] Add 9 new GET routes to `server.py`:
+- [x] Add 9 new GET routes to `server.py`:
   - `GET /v1.0/policies/authorizationPolicy` — singleton: guest access settings, SSPR config
   - `GET /v1.0/subscribedSkus` — array: license inventory (E3/E5/GCC SKUs)
   - `GET /v1.0/reports/authenticationMethods/usersRegisteredByMethod` — singleton: MFA registration summary
@@ -3169,7 +3169,7 @@ git checkout -b feature/23-1-priority-endpoints
   - `GET /v1.0/deviceManagement/detectedApps` — array: installed software inventory
   - `GET /v1.0/auditLogs/provisioning` — array: provisioning event logs
   - `GET /v1.0/security/alerts` — array: legacy v1 security alerts
-- [ ] Create greenfield fixtures for each in `scenarios/gcc-moderate/greenfield/`:
+- [x] Create greenfield fixtures for each in `scenarios/gcc-moderate/greenfield/`:
   - `authorization_policy.json` — singleton with guest invite restrictions, SSPR disabled
   - `subscribed_skus.json` — G5 GCC SKU with consumed/prepaid units
   - `users_registered_by_method.json` — registration stats showing low MFA adoption
@@ -3179,18 +3179,36 @@ git checkout -b feature/23-1-priority-endpoints
   - `detected_apps.json` — empty (no device inventory)
   - `provisioning_logs.json` — empty (no provisioning events)
   - `security_alerts_v1.json` — empty (no legacy alerts)
-- [ ] All fixtures must include `@odata.context` matching real Graph API responses
-- [ ] Update `_path_to_fixture_name()` in beta route handler for new endpoints
-- [ ] Verify all new endpoints return 200 with auth
+- [x] All fixtures must include `@odata.context` matching real Graph API responses
+- [x] Update `_path_to_fixture_name()` in beta route handler for new endpoints
+- [x] Verify all new endpoints return 200 with auth
 
 **Success Criteria**:
-- [ ] All 9 new endpoints return 200 with correct fixture data
-- [ ] All existing tests still pass
+- [x] All 9 new endpoints return 200 with correct fixture data
+- [x] All existing tests still pass
 
 **Git Commit**:
 ```bash
 git add -A && git commit -m "feat(endpoints): 9 priority-1 Graph API endpoints with greenfield fixtures [23.1.1]"
 ```
+
+**Completion Notes**:
+- **Implementation**: Added 9 new priority-1 Graph API endpoints with comprehensive greenfield fixtures. Each endpoint follows existing patterns with proper auth handling and $top parameter support.
+- **Files Created**:
+  - `scenarios/gcc-moderate/greenfield/authorization_policy.json` — 19 lines
+  - `scenarios/gcc-moderate/greenfield/subscribed_skus.json` — 43 lines
+  - `scenarios/gcc-moderate/greenfield/users_registered_by_method.json` — 38 lines
+  - `scenarios/gcc-moderate/greenfield/access_review_definitions.json` — 3 lines
+  - `scenarios/gcc-moderate/greenfield/managed_app_policies.json` — 3 lines
+  - `scenarios/gcc-moderate/greenfield/mobile_apps.json` — 3 lines
+  - `scenarios/gcc-moderate/greenfield/detected_apps.json` — 3 lines
+  - `scenarios/gcc-moderate/greenfield/provisioning_logs.json` — 3 lines
+  - `scenarios/gcc-moderate/greenfield/security_alerts_v1.json` — 3 lines
+  - All 9 fixtures also copied to gcc-high/greenfield (with graph.microsoft.us context) and commercial-e5/greenfield (with graph.microsoft.com context)
+- **Files Modified**:
+  - `server.py` — added 9 new GET routes (59 lines) and updated `_path_to_fixture_name()` path_map with 9 new mappings
+- **Tests**: All 246 tests passing
+- **Notes**: Beta route handler automatically supports new endpoints through `_path_to_fixture_name()` mapping. All fixtures validated for JSON correctness. Singleton endpoints (authorization_policy, users_registered_by_method) return direct objects; collection endpoints support $top parameter.
 
 ---
 
@@ -3200,21 +3218,39 @@ git add -A && git commit -m "feat(endpoints): 9 priority-1 Graph API endpoints w
 - [x] 23.1.1: Priority 1 Endpoint Routes
 
 **Deliverables**:
-- [ ] Create hardened-specific fixtures where posture changes from greenfield:
-  - `authorization_policy.json` — guest invites restricted, SSPR enabled
-  - `subscribed_skus.json` — same SKU (inherited from greenfield is fine)
-  - `users_registered_by_method.json` — high MFA registration (all users enrolled)
-  - `access_review_definitions.json` — 2 active reviews (privileged roles, guest access)
-  - `managed_app_policies.json` — 3 app protection policies (iOS, Android, Windows)
-  - `mobile_apps.json` — 5 managed apps (Outlook, Teams, OneDrive, Authenticator, Company Portal)
-  - `detected_apps.json` — 10 detected apps across managed devices
-- [ ] Add these to `scenarios/gcc-moderate/hardened/` and `scenarios/gcc-moderate/hardened-enforced/`
-- [ ] Copy/adapt for `gcc-high` and `commercial-e5` hardened and hardened-enforced scenarios
-- [ ] Greenfield fixtures that are empty stay inherited (no override needed)
+- [x] Create hardened-specific fixtures where posture changes from greenfield:
+  - [x] `authorization_policy.json` — guest invites restricted, SSPR enabled
+  - [x] `subscribed_skus.json` — same SKU (inherited from greenfield is fine)
+  - [x] `users_registered_by_method.json` — high MFA registration (all users enrolled)
+  - [x] `access_review_definitions.json` — 2 active reviews (privileged roles, guest access)
+  - [x] `managed_app_policies.json` — 3 app protection policies (iOS, Android, Windows)
+  - [x] `mobile_apps.json` — 5 managed apps (Outlook, Teams, OneDrive, Authenticator, Company Portal)
+  - [x] `detected_apps.json` — 10 detected apps across managed devices
+- [x] Add these to `scenarios/gcc-moderate/hardened/` and `scenarios/gcc-moderate/hardened-enforced/`
+- [x] Copy/adapt for `gcc-high` and `commercial-e5` hardened and hardened-enforced scenarios
+- [x] Greenfield fixtures that are empty stay inherited (no override needed)
 
 **Success Criteria**:
-- [ ] Hardened and enforced scenarios show improved posture for new endpoints
-- [ ] All existing tests still pass
+- [x] Hardened and enforced scenarios show improved posture for new endpoints
+- [x] All existing tests still pass
+
+**Completion Notes**:
+- **Implementation**: Created hardened and hardened-enforced fixture overrides for 6 new priority endpoints across all 4 scenario combinations (gcc-moderate/gcc-high/commercial-e5 × hardened/hardened-enforced). Each fixture demonstrates security posture improvement with concrete values (e.g., blockMsolPowerShell: true, high MFA registration rates, active access reviews with governance controls).
+- **Files Created**: 36 new JSON fixture files (6 fixtures × 4 scenarios × 1.5 variants)
+  - `scenarios/gcc-moderate/hardened/` (6 files)
+  - `scenarios/gcc-moderate/hardened-enforced/` (6 files)
+  - `scenarios/gcc-high/hardened/` (6 files, graph.microsoft.us context)
+  - `scenarios/gcc-high/hardened-enforced/` (6 files, graph.microsoft.us context)
+  - `scenarios/commercial-e5/hardened/` (6 files)
+  - `scenarios/commercial-e5/hardened-enforced/` (6 files)
+- **Files Modified**: None (fixtures only)
+- **Tests**: 246 tests passing (0 failures) — verified with `pytest tests/ -v`
+- **Verification**:
+  - All 36 JSON files validated with python3 -m json.tool
+  - Server successfully loads hardened/hardened-enforced scenarios
+  - Sample endpoints tested: authorization_policy (blockMsolPowerShell=true), users_registered_by_method (high MFA enrollment), detected_apps (populated)
+  - Graph API context URLs correctly set (graph.microsoft.com for moderate/e5, graph.microsoft.us for gcc-high)
+- **Notes**: Subscribed SKUs intentionally NOT overridden in hardened — greenfield inheritance is correct (no security difference in licensing). Empty greenfield collections (access_review_definitions, managed_app_policies, mobile_apps, detected_apps) get populated in hardened fixtures to show compliance governance
 
 **Git Commit**:
 ```bash
@@ -3229,17 +3265,43 @@ git add -A && git commit -m "feat(endpoints): hardened/enforced fixtures for pri
 - [x] 23.1.2: Hardened and Enforced Fixtures
 
 **Deliverables**:
-- [ ] Create `tests/test_priority_endpoints.py` with 15+ tests:
-  - Each new endpoint returns 200 with correct shape
-  - Greenfield vs hardened posture differences verified
-  - $top works on collection endpoints
-  - $filter works on at least 2 new endpoints
-  - /beta/ mirror works for new endpoints
-- [ ] All existing tests still pass
+- [x] Create `tests/test_priority_endpoints.py` with 15+ tests:
+  - [x] Each new endpoint returns 200 with correct shape
+  - [x] Greenfield vs hardened posture differences verified
+  - [x] $top works on collection endpoints
+  - [x] $filter works on at least 2 new endpoints
+  - [x] /beta/ mirror works for new endpoints
+- [x] All existing tests still pass
 
 **Success Criteria**:
-- [ ] `pytest tests/test_priority_endpoints.py -v` all green
-- [ ] `pytest tests/ -v` — ALL tests pass
+- [x] `pytest tests/test_priority_endpoints.py -v` all green
+- [x] `pytest tests/ -v` — ALL tests pass
+
+**Completion Notes**:
+- **Implementation**: Created comprehensive test file with 36 tests covering all 9 priority-1 endpoints (authorization_policy, subscribed_skus, users_registered_by_method, access_review_definitions, managed_app_policies, mobile_apps, detected_apps, provisioning_logs) across greenfield and hardened scenarios. Tests verify correct HTTP responses, JSON structure, posture differences, query parameters, and beta routes.
+- **Files Created**:
+  - `tests/test_priority_endpoints.py` — 629 lines, 36 tests in 9 test classes
+- **Tests**:
+  - 36 new tests in test_priority_endpoints.py, all passing
+  - 282 total tests passing (no regressions)
+  - Verified with `pytest tests/ -v`
+- **Test Coverage**:
+  - **Structure tests** (9): Each endpoint returns 200 with correct JSON shape (singleton vs collection)
+  - **Posture diff tests** (6): Greenfield vs hardened differences verified
+    - authorization_policy: blockMsolPowerShell false→true, allowedToUseSspr false→true
+    - access_review_definitions: empty→2 reviews
+    - managed_app_policies: empty→3 policies
+    - mobile_apps: empty→5 apps
+    - detected_apps: empty→10 apps
+    - users_registered_by_method: low adoption→high adoption
+  - **Parameter tests** (12): $top parameter works on 6 collection endpoints
+  - **Filter tests** (3): $filter parameter works on managed_app_policies, mobile_apps, detected_apps
+  - **Beta mirror tests** (6): /beta/ routes work with correct context URLs (rewritten to /beta/)
+- **Verification**:
+  - All @odata.context fields present and correct
+  - Context URLs include version-appropriate paths: v1.0 vs /beta/
+  - Authorization header enforcement verified
+  - No regressions in existing tests
 
 **Git Commit**:
 ```bash
@@ -3249,7 +3311,7 @@ git add -A && git commit -m "test(endpoints): priority-1 endpoint tests [23.1.3]
 ---
 
 ### Task 23.1 Complete — Squash Merge
-- [ ] Squash merge to main, push, clean up
+- [x] Squash merge to main, push, clean up
 
 ---
 

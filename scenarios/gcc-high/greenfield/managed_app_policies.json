@@ -1,0 +1,4 @@
+{
+  "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#deviceAppManagement/managedAppPolicies",
+  "value": []
+}

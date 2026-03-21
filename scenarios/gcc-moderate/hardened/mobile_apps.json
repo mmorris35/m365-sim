@@ -1,0 +1,120 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#deviceAppManagement/mobileApps",
+  "value": [
+    {
+      "@odata.type": "#microsoft.graph.iosLobApp",
+      "id": "00000000-0000-0000-0000-000000000601",
+      "displayName": "Microsoft Outlook",
+      "description": "Secure email and calendar management for iOS",
+      "publisher": "Microsoft Corporation",
+      "largeIcon": {
+        "type": "#microsoft.graph.mimeContent",
+        "value": "base64_encoded_icon_data"
+      },
+      "createdDateTime": "2024-06-10T08:00:00Z",
+      "lastModifiedDateTime": "2025-03-19T14:30:00Z",
+      "isFeatured": true,
+      "version": "4.2309.5",
+      "bundleId": "com.microsoft.office.outlook",
+      "appStoreUrl": "https://apps.apple.com/app/microsoft-outlook/id951937694",
+      "minimumSupportedOperatingSystem": {
+        "v14_0": true
+      },
+      "committedContentVersion": "1",
+      "size": 245000000,
+      "fileName": "Outlook.ipa"
+    },
+    {
+      "@odata.type": "#microsoft.graph.iosLobApp",
+      "id": "00000000-0000-0000-0000-000000000602",
+      "displayName": "Microsoft Teams",
+      "description": "Unified communication and collaboration for iOS",
+      "publisher": "Microsoft Corporation",
+      "largeIcon": {
+        "type": "#microsoft.graph.mimeContent",
+        "value": "base64_encoded_icon_data"
+      },
+      "createdDateTime": "2024-06-10T08:15:00Z",
+      "lastModifiedDateTime": "2025-03-19T14:30:00Z",
+      "isFeatured": true,
+      "version": "5.1.2309",
+      "bundleId": "com.microsoft.skype.teams",
+      "appStoreUrl": "https://apps.apple.com/app/microsoft-teams/id1113153822",
+      "minimumSupportedOperatingSystem": {
+        "v14_0": true
+      },
+      "committedContentVersion": "1",
+      "size": 320000000,
+      "fileName": "Teams.ipa"
+    },
+    {
+      "@odata.type": "#microsoft.graph.iosLobApp",
+      "id": "00000000-0000-0000-0000-000000000603",
+      "displayName": "Microsoft OneDrive",
+      "description": "File storage and sync for iOS",
+      "publisher": "Microsoft Corporation",
+      "largeIcon": {
+        "type": "#microsoft.graph.mimeContent",
+        "value": "base64_encoded_icon_data"
+      },
+      "createdDateTime": "2024-06-10T08:30:00Z",
+      "lastModifiedDateTime": "2025-03-19T14:30:00Z",
+      "isFeatured": true,
+      "version": "13.47",
+      "bundleId": "com.microsoft.skydrive",
+      "appStoreUrl": "https://apps.apple.com/app/microsoft-onedrive/id477537958",
+      "minimumSupportedOperatingSystem": {
+        "v14_0": true
+      },
+      "committedContentVersion": "1",
+      "size": 280000000,
+      "fileName": "OneDrive.ipa"
+    },
+    {
+      "@odata.type": "#microsoft.graph.iosLobApp",
+      "id": "00000000-0000-0000-0000-000000000604",
+      "displayName": "Microsoft Authenticator",
+      "description": "Multi-factor authentication and credential management",
+      "publisher": "Microsoft Corporation",
+      "largeIcon": {
+        "type": "#microsoft.graph.mimeContent",
+        "value": "base64_encoded_icon_data"
+      },
+      "createdDateTime": "2024-06-10T08:45:00Z",
+      "lastModifiedDateTime": "2025-03-19T14:30:00Z",
+      "isFeatured": true,
+      "version": "6.2403",
+      "bundleId": "com.microsoft.authenticator",
+      "appStoreUrl": "https://apps.apple.com/app/microsoft-authenticator/id983156458",
+      "minimumSupportedOperatingSystem": {
+        "v14_0": true
+      },
+      "committedContentVersion": "1",
+      "size": 95000000,
+      "fileName": "Authenticator.ipa"
+    },
+    {
+      "@odata.type": "#microsoft.graph.iosLobApp",
+      "id": "00000000-0000-0000-0000-000000000605",
+      "displayName": "Intune Company Portal",
+      "description": "Device management and corporate resource access",
+      "publisher": "Microsoft Corporation",
+      "largeIcon": {
+        "type": "#microsoft.graph.mimeContent",
+        "value": "base64_encoded_icon_data"
+      },
+      "createdDateTime": "2024-06-10T09:00:00Z",
+      "lastModifiedDateTime": "2025-03-19T14:30:00Z",
+      "isFeatured": true,
+      "version": "5.2403",
+      "bundleId": "com.microsoft.CompanyPortalMac",
+      "appStoreUrl": "https://apps.apple.com/app/intune-company-portal/id719171358",
+      "minimumSupportedOperatingSystem": {
+        "v14_0": true
+      },
+      "committedContentVersion": "1",
+      "size": 110000000,
+      "fileName": "CompanyPortal.ipa"
+    }
+  ]
+}
