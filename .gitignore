@@ -19,6 +19,7 @@ build/
 
 # Coverage
 .coverage
+htmlcov/
 
 # Source kickoff doc (not for public repo)
 m365_sim_kickoff.md
