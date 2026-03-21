@@ -14,5 +14,11 @@ build/
 .DS_Store
 ._*
 
+# Claude Code
+.claude/
+
+# Coverage
+.coverage
+
 # Source kickoff doc (not for public repo)
 m365_sim_kickoff.md
