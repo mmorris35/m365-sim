@@ -60,6 +60,9 @@ def load_fixtures(cloud: str, scenario: str) -> dict[str, dict]:
     If scenario is not greenfield, load greenfield as base first, then overlay
     the target scenario. This allows target scenarios to only override files
     that changed.
+
+    Also loads beta-specific fixtures from scenarios/{cloud}/{scenario}/beta/*.json
+    and prefixes them with "beta/" in the fixture name (e.g., "beta/managed_devices").
     """
     fixtures: dict[str, dict] = {}
     base_path = Path(__file__).parent / "scenarios" / cloud
@@ -96,6 +99,38 @@ def load_fixtures(cloud: str, scenario: str) -> dict[str, dict]:
             logger.info(f"Loaded fixture: {stem}")
         except Exception as e:
             logger.error(f"Failed to load fixture {json_file}: {e}")
+
+    # Load beta-specific fixtures from beta/ subdirectory with "beta/" prefix
+    beta_dir = scenario_dir / "beta"
+    if beta_dir.exists():
+        json_files = sorted(beta_dir.glob("*.json"))
+        for json_file in json_files:
+            try:
+                with open(json_file, "r") as f:
+                    fixture_data = json.load(f)
+                stem = json_file.stem
+                # Prefix with "beta/" to distinguish from v1.0 fixtures
+                fixtures[f"beta/{stem}"] = fixture_data
+                logger.info(f"Loaded beta fixture: beta/{stem}")
+            except Exception as e:
+                logger.error(f"Failed to load beta fixture {json_file}: {e}")
+
+    # Also load greenfield beta fixtures as fallback if scenario is not greenfield
+    if scenario != "greenfield":
+        greenfield_beta_dir = base_path / "greenfield" / "beta"
+        if greenfield_beta_dir.exists():
+            json_files = sorted(greenfield_beta_dir.glob("*.json"))
+            for json_file in json_files:
+                try:
+                    stem = json_file.stem
+                    # Only load if we haven't already loaded this beta fixture from the target scenario
+                    if f"beta/{stem}" not in fixtures:
+                        with open(json_file, "r") as f:
+                            fixture_data = json.load(f)
+                        fixtures[f"beta/{stem}"] = fixture_data
+                        logger.info(f"Loaded base (greenfield) beta fixture: beta/{stem}")
+                except Exception as e:
+                    logger.error(f"Failed to load base beta fixture {json_file}: {e}")
 
     logger.info(f"Loaded {len(fixtures)} fixtures for {cloud}/{scenario}")
     return fixtures
@@ -1173,6 +1208,9 @@ async def beta_route(path: str, request: Request):
     This catch-all handler maps /beta/{path} to the /v1.0/{path} fixtures,
     with @odata.context URLs rewritten from v1.0 to beta.
 
+    Beta-specific fixtures are checked first (in fixtures["beta/{fixture_name}"]).
+    If not found, falls back to v1.0 fixtures (in fixtures["{fixture_name}"]).
+
     Supports all query parameters ($top, $filter, $expand) and write operations
     (POST, PATCH) with the same behavior as v1.0 routes.
     """
@@ -1183,9 +1221,18 @@ async def beta_route(path: str, request: Request):
 
     # Map the path to a fixture name for get_fixture() calls
     # This reuses the exact same logic as v1.0 routes
-    fixture_name = _path_to_fixture_name(path)
+    v1_fixture_name = _path_to_fixture_name(path)
 
-    logger.info(f"Beta route {method} /beta/{path} -> fixture '{fixture_name}'")
+    # Check for beta-specific fixture first, then fall back to v1.0 fixture
+    fixtures = _get_fixtures_for_request(request)
+    beta_fixture_name = f"beta/{v1_fixture_name}"
+
+    if beta_fixture_name in fixtures:
+        fixture_name = beta_fixture_name
+        logger.info(f"Beta route {method} /beta/{path} -> beta fixture '{fixture_name}'")
+    else:
+        fixture_name = v1_fixture_name
+        logger.info(f"Beta route {method} /beta/{path} -> v1.0 fixture '{fixture_name}'")
 
     if method == "GET":
         # For GET requests, delegate to get_fixture with context rewriting
@@ -1275,6 +1322,14 @@ def _path_to_fixture_name(path: str) -> str:
         "deviceManagement/detectedApps": "detected_apps",
         "auditLogs/provisioning": "provisioning_logs",
         "security/alerts": "security_alerts_v1",
+        # Beta-only paths (not available in v1.0)
+        "identityProtection/riskDetections": "risk_detections",
+        "security/attackSimulation/simulations": "attack_simulations",
+        "security/attackSimulation/trainings": "attack_trainings",
+        "deviceManagement/deviceHealthScripts": "device_health_scripts",
+        "security/securityIntents": "intents",
+        "deviceManagement/groupPolicyConfigurations": "group_policy_configurations",
+        "deviceManagement/remoteActionAudits": "remote_action_audits",
     }
 
     # Try exact match first

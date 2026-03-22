@@ -1,0 +1,20 @@
+{
+  "@odata.context": "https://graph.microsoft.com/beta/$metadata#security/attackSimulation/simulations",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000801",
+      "displayName": "Phishing Campaign - Q1 2025",
+      "description": "Quarterly phishing simulation to assess user awareness",
+      "createdDateTime": "2025-01-15T08:00:00Z",
+      "lastModifiedDateTime": "2025-03-10T16:30:00Z",
+      "startDateTime": "2025-03-01T09:00:00Z",
+      "endDateTime": "2025-03-14T17:00:00Z",
+      "status": "completed",
+      "totalSubmission": 125,
+      "successfulUserCount": 122,
+      "reportIncludeUrl": "https://attack.microsoft.com/api/v2/reports/00000000-0000-0000-0000-000000000801",
+      "completionDateTime": "2025-03-14T17:00:00Z",
+      "percentageOfUsersCompromised": 2.4
+    }
+  ]
+}

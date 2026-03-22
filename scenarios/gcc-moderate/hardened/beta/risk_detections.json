@@ -1,0 +1,63 @@
+{
+  "@odata.context": "https://graph.microsoft.com/beta/$metadata#identityProtection/riskDetections",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000601",
+      "requestId": "00000000-0000-0000-0000-000000000601",
+      "correlationId": "00000000-0000-0000-0000-000000000601",
+      "riskEventType": "impossible_travel",
+      "riskType": "impossibleTravel",
+      "riskLevel": "medium",
+      "riskState": "resolved",
+      "riskDetail": "traveledFromUnusualLocation",
+      "source": "IdentityProtection",
+      "detection": "2025-03-15T10:30:00Z",
+      "detectedDateTime": "2025-03-15T10:30:00Z",
+      "lastUpdatedDateTime": "2025-03-16T08:15:00Z",
+      "resourceIdentity": "f00e3df5-3db9-4f3c-8949-b5c96ec60aa1",
+      "resourceDisplayName": "user@contoso-defense.com",
+      "userDisplayName": "User One",
+      "userId": "f00e3df5-3db9-4f3c-8949-b5c96ec60aa1",
+      "userPrincipalName": "user@contoso-defense.com",
+      "additionalInfo": "[{\"Key\":\"alertUrl\",\"Value\":\"https://graph.microsoft.com/api/v1.0/riskDetections/00000000-0000-0000-0000-000000000601\"}]",
+      "location": {
+        "countryOrRegion": "US",
+        "state": "CA",
+        "city": "San Francisco",
+        "coordinates": {
+          "latitude": 37.7749,
+          "longitude": -122.4194
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000602",
+      "requestId": "00000000-0000-0000-0000-000000000602",
+      "correlationId": "00000000-0000-0000-0000-000000000602",
+      "riskEventType": "malware",
+      "riskType": "malware",
+      "riskLevel": "high",
+      "riskState": "resolved",
+      "riskDetail": "malwareDetected",
+      "source": "IdentityProtection",
+      "detection": "2025-03-10T14:45:00Z",
+      "detectedDateTime": "2025-03-10T14:45:00Z",
+      "lastUpdatedDateTime": "2025-03-11T09:20:00Z",
+      "resourceIdentity": "00000000-0000-0000-0000-000000000102",
+      "resourceDisplayName": "admin@contoso-defense.com",
+      "userDisplayName": "Admin Two",
+      "userId": "00000000-0000-0000-0000-000000000102",
+      "userPrincipalName": "admin@contoso-defense.com",
+      "additionalInfo": "[{\"Key\":\"alertUrl\",\"Value\":\"https://graph.microsoft.com/api/v1.0/riskDetections/00000000-0000-0000-0000-000000000602\"}]",
+      "location": {
+        "countryOrRegion": "US",
+        "state": "DC",
+        "city": "Washington",
+        "coordinates": {
+          "latitude": 38.9072,
+          "longitude": -77.0369
+        }
+      }
+    }
+  ]
+}

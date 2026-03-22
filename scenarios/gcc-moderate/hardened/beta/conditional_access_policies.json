@@ -1,0 +1,95 @@
+{
+  "@odata.context": "https://graph.microsoft.com/beta/$metadata#identity/conditionalAccess/policies",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000101",
+      "displayName": "CMMC-MFA-AllUsers",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "users": {
+          "includeUsers": [
+            "All"
+          ],
+          "excludeUsers": [
+            "00000000-0000-0000-0000-000000000011"
+          ]
+        }
+      },
+      "grantControls": {
+        "operator": "AND",
+        "builtInControls": [
+          "mfa"
+        ],
+        "authenticationStrength": {
+          "displayName": "Passwordless Phone Sign-in",
+          "createdDateTime": "2024-01-01T00:00:00Z",
+          "lastModifiedDateTime": "2024-01-01T00:00:00Z",
+          "allowedCombinations": [
+            "windowsHelloForBusiness",
+            "fido2"
+          ]
+        }
+      },
+      "sessionControls": {
+        "signInFrequency": {
+          "value": 0,
+          "type": "days",
+          "isEnabled": false
+        },
+        "cloudAppSecurity": {
+          "isEnabled": true,
+          "cloudAppSecurityType": "blockDownloads"
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000102",
+      "displayName": "CMMC-MFA-Admins",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "users": {
+          "includeRoles": [
+            "62e90394-69f5-4237-9190-012177145e10",
+            "194ae4cb-b126-40b2-bd5b-6091b380977d"
+          ],
+          "excludeUsers": [
+            "00000000-0000-0000-0000-000000000011"
+          ]
+        }
+      },
+      "grantControls": {
+        "operator": "AND",
+        "builtInControls": [
+          "mfa"
+        ],
+        "customAuthenticationFactors": [
+          "RequirePhishingResistantMFA"
+        ],
+        "authenticationStrength": {
+          "displayName": "Phishing-Resistant",
+          "createdDateTime": "2024-01-01T00:00:00Z",
+          "lastModifiedDateTime": "2024-01-01T00:00:00Z",
+          "allowedCombinations": [
+            "fido2"
+          ]
+        }
+      },
+      "sessionControls": {
+        "cloudAppSecurity": {
+          "isEnabled": true,
+          "cloudAppSecurityType": "blockDownloads"
+        }
+      }
+    }
+  ]
+}

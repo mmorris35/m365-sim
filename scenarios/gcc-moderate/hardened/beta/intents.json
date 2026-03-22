@@ -1,0 +1,31 @@
+{
+  "@odata.context": "https://graph.microsoft.com/beta/$metadata#security/securityIntents",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000b01",
+      "displayName": "CMMC Level 2 Security Baseline",
+      "description": "Microsoft recommended security baseline for CMMC 2.0 Level 2 compliance",
+      "createdDateTime": "2024-12-15T08:00:00Z",
+      "lastModifiedDateTime": "2025-03-15T10:00:00Z",
+      "lastStatusCheckDateTime": "2025-03-19T14:00:00Z",
+      "status": "completed",
+      "completionPercentage": 92,
+      "deploymentPackages": [
+        {
+          "id": "00000000-0000-0000-0000-000000000b11",
+          "displayName": "Identity and Access Management",
+          "description": "Configure MFA, sign-in risk policies, and session management",
+          "deploymentStatus": "active",
+          "configurationCount": 8
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000b12",
+          "displayName": "Device Security",
+          "description": "Enforce device compliance and encryption requirements",
+          "deploymentStatus": "active",
+          "configurationCount": 12
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "@odata.context": "https://graph.microsoft.com/beta/$metadata#deviceManagement/deviceConfigurations",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000501",
+      "@odata.type": "#microsoft.graph.windows10CustomConfiguration",
+      "displayName": "CMMC-Windows-Security-Settings",
+      "description": "Custom OMA-URI settings for Windows 10 security hardening",
+      "createdDateTime": "2024-01-05T08:00:00Z",
+      "lastModifiedDateTime": "2024-01-05T08:00:00Z",
+      "omaSettings": [
+        {
+          "omaUri": "./Device/Vendor/MSFT/Defender/Configuration/TamperProtection",
+          "displayName": "Defender Tamper Protection",
+          "description": "Enable Defender Tamper Protection to prevent disabling security features",
+          "value": "1",
+          "dataType": "int",
+          "isEncrypted": false,
+          "isReadOnly": false
+        },
+        {
+          "omaUri": "./Device/Vendor/MSFT/BitLocker/RequireDeviceEncryption",
+          "displayName": "Require BitLocker",
+          "description": "Force BitLocker encryption on all volumes",
+          "value": "1",
+          "dataType": "int",
+          "isEncrypted": false,
+          "isReadOnly": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "@odata.context": "https://graph.microsoft.com/beta/$metadata#security/attackSimulation/trainings",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000901",
+      "displayName": "Phishing Recognition Training",
+      "description": "Training module to identify phishing emails and malicious links",
+      "createdDateTime": "2025-01-10T08:00:00Z",
+      "lastModifiedDateTime": "2025-03-15T10:00:00Z",
+      "source": "builtin",
+      "type": "phishing",
+      "language": "en-us",
+      "completionUsers": 118,
+      "totalUsers": 125,
+      "percentageCompleted": 94.4
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000902",
+      "displayName": "Data Protection and Privacy Awareness",
+      "description": "Training on protecting sensitive company data and personal privacy",
+      "createdDateTime": "2025-02-01T08:00:00Z",
+      "lastModifiedDateTime": "2025-03-15T10:00:00Z",
+      "source": "builtin",
+      "type": "dataProtection",
+      "language": "en-us",
+      "completionUsers": 112,
+      "totalUsers": 125,
+      "percentageCompleted": 89.6
+    }
+  ]
+}

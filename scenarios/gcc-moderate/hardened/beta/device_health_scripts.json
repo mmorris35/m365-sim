@@ -1,0 +1,37 @@
+{
+  "@odata.context": "https://graph.microsoft.com/beta/$metadata#deviceManagement/deviceHealthScripts",
+  "value": [
+    {
+      "id": "00000000-0000-0000-0000-000000000a01",
+      "displayName": "Check Windows Defender Status",
+      "description": "Proactive remediation to ensure Windows Defender is enabled and up-to-date",
+      "createdDateTime": "2024-12-01T08:00:00Z",
+      "lastModifiedDateTime": "2025-03-15T10:00:00Z",
+      "publisher": "Microsoft",
+      "version": "1.0",
+      "runSchedule": "daily",
+      "runAsAccount": "system",
+      "enforceSignatureCheck": true,
+      "isGlobalScript": false,
+      "highestAvailableVersion": "1.0",
+      "remediationScriptContent": "# Check and enable Windows Defender",
+      "detectionScriptContent": "# Detect if Windows Defender is enabled"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000a02",
+      "displayName": "Update BitLocker Recovery Key",
+      "description": "Proactive remediation to backup BitLocker recovery keys to Azure AD",
+      "createdDateTime": "2024-12-10T08:00:00Z",
+      "lastModifiedDateTime": "2025-03-15T10:00:00Z",
+      "publisher": "Microsoft",
+      "version": "1.0",
+      "runSchedule": "weekly",
+      "runAsAccount": "system",
+      "enforceSignatureCheck": true,
+      "isGlobalScript": false,
+      "highestAvailableVersion": "1.0",
+      "remediationScriptContent": "# Backup BitLocker key to Azure AD",
+      "detectionScriptContent": "# Check if BitLocker key is backed up"
+    }
+  ]
+}
