@@ -46,9 +46,10 @@ Use the m365-sim-executor agent to execute subtask X.Y.Z
 - [x] Phase 22 — Enforced Scenario (Issue #1)
 - [x] Phase 23 — Priority 1 Endpoints (Issue #1)
 - [x] Phase 24 — Beta-Specific Fixtures (Issue #1)
+- [ ] Phase 25 — Defender for Endpoint API Surface (Issue #2)
 
-**Current**: Phase 24 (Complete)
-**Next**: (All phases complete)
+**Current**: Phase 25
+**Next**: 25.1.1
 
 ---
 
@@ -3458,6 +3459,131 @@ git add -A && git commit -m "test(beta): beta-specific fixture tests [24.1.2]"
   - Merged 2 subtask commits into single commit `5fa391e`
   - Pushed to origin/main
   - Deleted feature/24-1-beta-fixtures branch
+
+---
+
+## Phase 25: Defender for Endpoint API Surface (Issue #2)
+
+**Goal**: Add Microsoft Defender for Endpoint API endpoints (`/api/*`) to m365-sim. These 7 endpoints appear in CMMC control mappings and currently produce errors during mock-based testing. Serving them on the same port alongside Graph API routes (Option 1 from issue) for single-server convenience.
+**Duration**: 1-2 sessions
+**Issue**: https://github.com/mmorris35/m365-sim/issues/2
+
+### Task 25.1: Defender API Routes and Fixtures
+
+**Git**: Create branch `feature/25-1-defender-api` when starting first subtask.
+
+**Subtask 25.1.1: Defender API Routes and Greenfield Fixtures (Single Session)**
+
+**Prerequisites**:
+- [x] 24.1.2: Beta Fixture Tests
+
+**Git Start**:
+```bash
+git checkout main && git pull origin main
+git checkout -b feature/25-1-defender-api
+```
+
+**Deliverables**:
+- [ ] Add 7 new GET routes to `server.py` under `/api/` prefix:
+  - `GET /api/alerts` — array: Defender security alerts
+  - `GET /api/apps` — array: discovered applications
+  - `GET /api/deviceavinfo` — array: device antivirus status
+  - `GET /api/machines/{machine_id}/recommendations` — array: security recommendations per device
+  - `GET /api/machines/{machine_id}/vulnerabilities` — array: CVE objects per device
+  - `GET /api/policies/appcontrol` — array: WDAC/AppLocker policies
+  - `GET /api/vulnerabilities/machinesVulnerabilities` — array: all machine vulnerabilities
+- [ ] Auth: same Bearer token check as Graph routes (reuse existing AuthMiddleware)
+- [ ] Create greenfield fixtures in `scenarios/gcc-moderate/greenfield/`:
+  - `defender_alerts.json` — empty `value` array (no alerts in fresh tenant)
+  - `defender_apps.json` — empty `value` array
+  - `defender_deviceavinfo.json` — empty `value` array (no devices enrolled)
+  - `defender_recommendations.json` — empty `value` array
+  - `defender_vulnerabilities.json` — empty `value` array
+  - `defender_appcontrol.json` — empty `value` array (no WDAC policies)
+  - `defender_machine_vulnerabilities.json` — empty `value` array
+- [ ] All fixtures use `@odata.context` with `https://api.securitycenter.microsoft.com` base URL
+- [ ] `$top` and `$filter` work on Defender collection endpoints (reuse existing `get_fixture()`)
+- [ ] Copy greenfield fixtures to `scenarios/gcc-high/greenfield/` and `scenarios/commercial-e5/greenfield/` (adjust context URLs if needed — Defender may use same base URL across clouds)
+- [ ] All existing tests still pass
+
+**Success Criteria**:
+- [ ] All 7 `/api/` endpoints return 200 with correct fixture data
+- [ ] Auth enforcement works on `/api/` routes
+- [ ] Unmapped `/api/unknown` returns 404
+- [ ] All existing tests still pass
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(defender): 7 Defender for Endpoint API routes with greenfield fixtures [25.1.1]"
+```
+
+---
+
+**Subtask 25.1.2: Defender Hardened and Partial Fixtures (Single Session)**
+
+**Prerequisites**:
+- [x] 25.1.1: Defender API Routes and Greenfield Fixtures
+
+**Deliverables**:
+- [ ] Create hardened Defender fixtures in `scenarios/gcc-moderate/hardened/`:
+  - `defender_alerts.json` — 0 active alerts (all resolved), include 2-3 resolved historical alerts
+  - `defender_apps.json` — 10 discovered apps (standard enterprise software)
+  - `defender_deviceavinfo.json` — 3 devices with AV enabled, definitions up-to-date, real-time protection on
+  - `defender_recommendations.json` — 5 recommendations, all marked as completed/resolved
+  - `defender_vulnerabilities.json` — 0 active vulnerabilities (all patched)
+  - `defender_appcontrol.json` — 2 WDAC policies (audit mode + enforced block policy)
+  - `defender_machine_vulnerabilities.json` — empty (all resolved)
+- [ ] Create partial Defender fixtures in `scenarios/gcc-moderate/partial/`:
+  - `defender_alerts.json` — 3 active alerts (medium severity)
+  - `defender_deviceavinfo.json` — 1 device with AV, definitions stale
+  - `defender_appcontrol.json` — empty (WDAC not yet deployed)
+- [ ] Copy hardened fixtures to `hardened-enforced/` (identical Defender posture)
+- [ ] Copy/adapt for `gcc-high` and `commercial-e5` scenarios
+- [ ] All existing tests still pass
+
+**Success Criteria**:
+- [ ] Hardened shows resolved alerts, full AV, WDAC enforced
+- [ ] Partial shows active alerts, basic AV, no WDAC
+- [ ] Greenfield shows empty (no Defender deployment)
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "feat(defender): hardened and partial Defender fixtures [25.1.2]"
+```
+
+---
+
+**Subtask 25.1.3: Defender API Tests (Single Session)**
+
+**Prerequisites**:
+- [x] 25.1.2: Defender Hardened and Partial Fixtures
+
+**Deliverables**:
+- [ ] Create `tests/test_defender.py` with 15+ tests:
+  - Each of 7 endpoints returns 200 with correct shape
+  - Auth required (no header → 401)
+  - Greenfield: all endpoints return empty arrays
+  - Hardened: alerts resolved, AV enabled, WDAC policies present, vulnerabilities resolved
+  - Partial: active alerts, basic AV, no WDAC
+  - $top works on collection endpoints
+  - $filter works on at least 1 endpoint
+  - Parameterized machine endpoints work with any ID
+  - Unmapped `/api/unknown` returns 404
+- [ ] All existing tests still pass
+
+**Success Criteria**:
+- [ ] `pytest tests/test_defender.py -v` all green
+- [ ] `pytest tests/ -v` — ALL tests pass
+
+**Git Commit**:
+```bash
+git add -A && git commit -m "test(defender): Defender for Endpoint API tests [25.1.3]"
+```
+
+---
+
+### Task 25.1 Complete — Squash Merge
+- [ ] Squash merge to main, push, clean up
 
 ---
 
