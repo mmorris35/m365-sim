@@ -46,10 +46,10 @@ Use the m365-sim-executor agent to execute subtask X.Y.Z
 - [x] Phase 22 — Enforced Scenario (Issue #1)
 - [x] Phase 23 — Priority 1 Endpoints (Issue #1)
 - [x] Phase 24 — Beta-Specific Fixtures (Issue #1)
-- [ ] Phase 25 — Defender for Endpoint API Surface (Issue #2)
+- [x] Phase 25 — Defender for Endpoint API Surface (Issue #2)
 
-**Current**: Phase 25
-**Next**: 25.1.1
+**Current**: Phase 25 (Complete)
+**Next**: All planned phases complete ✅
 
 ---
 
@@ -57,22 +57,23 @@ Use the m365-sim-executor agent to execute subtask X.Y.Z
 
 🎉 **ALL PHASES COMPLETE** ✅
 
-The m365-sim project has reached feature completion:
-- 24 phases implemented (all planned work complete)
-- 308 tests passing (282 existing + 26 new beta fixture tests)
-- All 3 cloud targets (gcc-moderate, gcc-high, commercial-e5) fully supported
-- All scenarios (greenfield, hardened, hardened-enforced, partial) implemented
-- REST API complete with $filter, $expand, $top, POST/PATCH/GET operations
-- Beta endpoint mirroring with context URL rewriting AND beta-specific fixtures with extended properties
-- 13 beta-only endpoints (risk detections, attack simulations, attack trainings, device health scripts, security intents, etc.)
-- Extended fixture properties for managed devices (bitLocker, TPM, Windows Defender), compliance policies (assignments), device configs (OMA-URI), CA policies (authentication strength)
-- TenantBuilder fluent API for programmatic fixture creation
-- Stateful write operations with baseline reset/reload
-- Hot-reload file watcher support
-- Docker containerization
-- OSCAL component definition for compliance documentation
+The m365-sim project has reached full feature completion:
+- **25 phases implemented** (all planned work + Issue #2 complete)
+- **347 tests passing** (308 existing + 39 new Defender API tests)
+- **All 3 cloud targets** fully supported (gcc-moderate, gcc-high, commercial-e5)
+- **All scenarios** implemented (greenfield, hardened, hardened-enforced, partial)
+- **Microsoft Graph API** — 40+ endpoints with $filter, $expand, $top, POST/PATCH/GET operations
+- **Defender for Endpoint API** — 7 endpoints (`/api/alerts`, `/api/apps`, `/api/deviceavinfo`, `/api/machines/{id}/recommendations`, `/api/machines/{id}/vulnerabilities`, `/api/policies/appcontrol`, `/api/vulnerabilities/machinesVulnerabilities`)
+- **Beta API** — Full endpoint mirroring with context URL rewriting and 13 beta-specific endpoints
+- **Advanced Features**:
+  - Extended fixture properties (bitLocker, TPM, Windows Defender, authentication strength, WDAC policies, CVEs, antivirus status)
+  - TenantBuilder fluent API for programmatic fixture creation
+  - Stateful write operations with baseline reset/reload
+  - Hot-reload file watcher support
+  - Docker containerization
+  - OSCAL component definition for compliance documentation
 
-Ready for production use and integration testing. All GitHub issue requests fully implemented.
+Ready for production use and integration testing. All GitHub issue requests fully implemented. No known TODOs or blocking issues.
 
 ---
 
@@ -3484,33 +3485,49 @@ git checkout -b feature/25-1-defender-api
 ```
 
 **Deliverables**:
-- [ ] Add 7 new GET routes to `server.py` under `/api/` prefix:
-  - `GET /api/alerts` — array: Defender security alerts
-  - `GET /api/apps` — array: discovered applications
-  - `GET /api/deviceavinfo` — array: device antivirus status
-  - `GET /api/machines/{machine_id}/recommendations` — array: security recommendations per device
-  - `GET /api/machines/{machine_id}/vulnerabilities` — array: CVE objects per device
-  - `GET /api/policies/appcontrol` — array: WDAC/AppLocker policies
-  - `GET /api/vulnerabilities/machinesVulnerabilities` — array: all machine vulnerabilities
-- [ ] Auth: same Bearer token check as Graph routes (reuse existing AuthMiddleware)
-- [ ] Create greenfield fixtures in `scenarios/gcc-moderate/greenfield/`:
-  - `defender_alerts.json` — empty `value` array (no alerts in fresh tenant)
-  - `defender_apps.json` — empty `value` array
-  - `defender_deviceavinfo.json` — empty `value` array (no devices enrolled)
-  - `defender_recommendations.json` — empty `value` array
-  - `defender_vulnerabilities.json` — empty `value` array
-  - `defender_appcontrol.json` — empty `value` array (no WDAC policies)
-  - `defender_machine_vulnerabilities.json` — empty `value` array
-- [ ] All fixtures use `@odata.context` with `https://api.securitycenter.microsoft.com` base URL
-- [ ] `$top` and `$filter` work on Defender collection endpoints (reuse existing `get_fixture()`)
-- [ ] Copy greenfield fixtures to `scenarios/gcc-high/greenfield/` and `scenarios/commercial-e5/greenfield/` (adjust context URLs if needed — Defender may use same base URL across clouds)
-- [ ] All existing tests still pass
+- [x] Add 7 new GET routes to `server.py` under `/api/` prefix:
+  - [x] `GET /api/alerts` — array: Defender security alerts
+  - [x] `GET /api/apps` — array: discovered applications
+  - [x] `GET /api/deviceavinfo` — array: device antivirus status
+  - [x] `GET /api/machines/{machine_id}/recommendations` — array: security recommendations per device
+  - [x] `GET /api/machines/{machine_id}/vulnerabilities` — array: CVE objects per device
+  - [x] `GET /api/policies/appcontrol` — array: WDAC/AppLocker policies
+  - [x] `GET /api/vulnerabilities/machinesVulnerabilities` — array: all machine vulnerabilities
+- [x] Auth: same Bearer token check as Graph routes (reuse existing AuthMiddleware)
+- [x] Create greenfield fixtures in `scenarios/gcc-moderate/greenfield/`:
+  - [x] `defender_alerts.json` — empty `value` array (no alerts in fresh tenant)
+  - [x] `defender_apps.json` — empty `value` array
+  - [x] `defender_deviceavinfo.json` — empty `value` array (no devices enrolled)
+  - [x] `defender_recommendations.json` — empty `value` array
+  - [x] `defender_vulnerabilities.json` — empty `value` array
+  - [x] `defender_appcontrol.json` — empty `value` array (no WDAC policies)
+  - [x] `defender_machine_vulnerabilities.json` — empty `value` array
+- [x] All fixtures use `@odata.context` with `https://api.securitycenter.microsoft.com` base URL
+- [x] `$top` and `$filter` work on Defender collection endpoints (reuse existing `get_fixture()`)
+- [x] Copy greenfield fixtures to `scenarios/gcc-high/greenfield/` and `scenarios/commercial-e5/greenfield/` (adjust context URLs if needed — Defender may use same base URL across clouds)
+- [x] All existing tests still pass
 
 **Success Criteria**:
-- [ ] All 7 `/api/` endpoints return 200 with correct fixture data
-- [ ] Auth enforcement works on `/api/` routes
-- [ ] Unmapped `/api/unknown` returns 404
-- [ ] All existing tests still pass
+- [x] All 7 `/api/` endpoints return 200 with correct fixture data
+- [x] Auth enforcement works on `/api/` routes
+- [x] Unmapped `/api/unknown` returns 404
+- [x] All existing tests still pass
+
+**Completion Notes**:
+- **Implementation**: Added 7 new Defender for Endpoint API routes under `/api/` prefix. All routes follow the same pattern as Graph API routes: call `parse_top_param()`, then `get_fixture()` to load fixtures and apply query params. Auth enforcement is automatic via existing `AuthMiddleware`.
+- **Files Created**:
+  - `scenarios/gcc-moderate/greenfield/defender_alerts.json` - empty array
+  - `scenarios/gcc-moderate/greenfield/defender_apps.json` - empty array
+  - `scenarios/gcc-moderate/greenfield/defender_deviceavinfo.json` - empty array
+  - `scenarios/gcc-moderate/greenfield/defender_recommendations.json` - empty array
+  - `scenarios/gcc-moderate/greenfield/defender_vulnerabilities.json` - empty array
+  - `scenarios/gcc-moderate/greenfield/defender_appcontrol.json` - empty array
+  - `scenarios/gcc-moderate/greenfield/defender_machine_vulnerabilities.json` - empty array
+  - Copied to gcc-high and commercial-e5 greenfield directories (21 files total)
+- **Files Modified**:
+  - `server.py` - added 7 routes with 52-line addition
+- **Tests**: All existing tests pass (308 tests)
+- **Notes**: Defender API uses `https://api.securitycenter.microsoft.com` context URL across all clouds (no cloud-specific variation needed). Routes support $top and $filter via existing `get_fixture()` function. Parameterized machine endpoints ignore the machine_id parameter (return fixture data for all machines) - consistent with mock server behavior.
 
 **Git Commit**:
 ```bash
@@ -3525,26 +3542,37 @@ git add -A && git commit -m "feat(defender): 7 Defender for Endpoint API routes 
 - [x] 25.1.1: Defender API Routes and Greenfield Fixtures
 
 **Deliverables**:
-- [ ] Create hardened Defender fixtures in `scenarios/gcc-moderate/hardened/`:
-  - `defender_alerts.json` — 0 active alerts (all resolved), include 2-3 resolved historical alerts
-  - `defender_apps.json` — 10 discovered apps (standard enterprise software)
-  - `defender_deviceavinfo.json` — 3 devices with AV enabled, definitions up-to-date, real-time protection on
-  - `defender_recommendations.json` — 5 recommendations, all marked as completed/resolved
-  - `defender_vulnerabilities.json` — 0 active vulnerabilities (all patched)
-  - `defender_appcontrol.json` — 2 WDAC policies (audit mode + enforced block policy)
-  - `defender_machine_vulnerabilities.json` — empty (all resolved)
-- [ ] Create partial Defender fixtures in `scenarios/gcc-moderate/partial/`:
-  - `defender_alerts.json` — 3 active alerts (medium severity)
-  - `defender_deviceavinfo.json` — 1 device with AV, definitions stale
-  - `defender_appcontrol.json` — empty (WDAC not yet deployed)
-- [ ] Copy hardened fixtures to `hardened-enforced/` (identical Defender posture)
-- [ ] Copy/adapt for `gcc-high` and `commercial-e5` scenarios
-- [ ] All existing tests still pass
+- [x] Create hardened Defender fixtures in `scenarios/gcc-moderate/hardened/`:
+  - [x] `defender_alerts.json` — 0 active alerts (all resolved), include 2-3 resolved historical alerts
+  - [x] `defender_apps.json` — 10 discovered apps (standard enterprise software)
+  - [x] `defender_deviceavinfo.json` — 3 devices with AV enabled, definitions up-to-date, real-time protection on
+  - [x] `defender_recommendations.json` — 5 recommendations, all marked as completed/resolved
+  - [x] `defender_vulnerabilities.json` — 0 active vulnerabilities (all patched)
+  - [x] `defender_appcontrol.json` — 2 WDAC policies (audit mode + enforced block policy)
+  - [x] `defender_machine_vulnerabilities.json` — empty (all resolved)
+- [x] Create partial Defender fixtures in `scenarios/gcc-moderate/partial/`:
+  - [x] `defender_alerts.json` — 3 active alerts (medium severity)
+  - [x] `defender_deviceavinfo.json` — 1 device with AV, definitions stale
+  - [x] `defender_appcontrol.json` — empty (WDAC not yet deployed)
+- [x] Copy hardened fixtures to `hardened-enforced/` (identical Defender posture)
+- [x] Copy/adapt for `gcc-high` and `commercial-e5` scenarios
+- [x] All existing tests still pass
 
 **Success Criteria**:
-- [ ] Hardened shows resolved alerts, full AV, WDAC enforced
-- [ ] Partial shows active alerts, basic AV, no WDAC
-- [ ] Greenfield shows empty (no Defender deployment)
+- [x] Hardened shows resolved alerts, full AV, WDAC enforced
+- [x] Partial shows active alerts, basic AV, no WDAC
+- [x] Greenfield shows empty (no Defender deployment)
+
+**Completion Notes**:
+- **Implementation**: Created comprehensive hardened and partial Defender fixtures representing different deployment states:
+  - Hardened: 3 resolved alerts, 10 apps, 3 devices with current AV, 5 completed recommendations, 2 WDAC policies (audit + enforced), no vulnerabilities
+  - Partial: 3 active in-progress alerts, 1 device with stale AV definitions, no WDAC policies
+- **Files Created**:
+  - Hardened: 7 fixtures in gcc-moderate/hardened/, copied to hardened-enforced/, gcc-high/hardened/, commercial-e5/hardened/ (28 files)
+  - Partial: 3 fixtures in gcc-moderate/partial/, copied to gcc-high/partial/, commercial-e5/partial/ (9 files)
+- **Files Modified**: None
+- **Tests**: All 308 existing tests still pass
+- **Notes**: Hardened fixtures show security posture consistent with CMMC L2 remediation. Partial fixtures represent mid-deployment state (active alerts, basic AV, no WDAC yet). All fixtures use api.securitycenter.microsoft.com context URL.
 
 **Git Commit**:
 ```bash
@@ -3559,21 +3587,38 @@ git add -A && git commit -m "feat(defender): hardened and partial Defender fixtu
 - [x] 25.1.2: Defender Hardened and Partial Fixtures
 
 **Deliverables**:
-- [ ] Create `tests/test_defender.py` with 15+ tests:
-  - Each of 7 endpoints returns 200 with correct shape
-  - Auth required (no header → 401)
-  - Greenfield: all endpoints return empty arrays
-  - Hardened: alerts resolved, AV enabled, WDAC policies present, vulnerabilities resolved
-  - Partial: active alerts, basic AV, no WDAC
-  - $top works on collection endpoints
-  - $filter works on at least 1 endpoint
-  - Parameterized machine endpoints work with any ID
-  - Unmapped `/api/unknown` returns 404
-- [ ] All existing tests still pass
+- [x] Create `tests/test_defender.py` with 15+ tests:
+  - [x] Each of 7 endpoints returns 200 with correct shape
+  - [x] Auth required (no header → 401)
+  - [x] Greenfield: all endpoints return empty arrays
+  - [x] Hardened: alerts resolved, AV enabled, WDAC policies present, vulnerabilities resolved
+  - [x] Partial: active alerts, basic AV, no WDAC
+  - [x] $top works on collection endpoints
+  - [x] $filter works on at least 1 endpoint
+  - [x] Parameterized machine endpoints work with any ID
+  - [x] Unmapped `/api/unknown` returns 404
+- [x] All existing tests still pass
 
 **Success Criteria**:
-- [ ] `pytest tests/test_defender.py -v` all green
-- [ ] `pytest tests/ -v` — ALL tests pass
+- [x] `pytest tests/test_defender.py -v` all green
+- [x] `pytest tests/ -v` — ALL tests pass
+
+**Completion Notes**:
+- **Implementation**: Created 39 comprehensive tests covering all Defender API endpoints and scenarios:
+  - 7 tests: Basic endpoint structure and response format
+  - 7 tests: Authentication enforcement (no header → 401)
+  - 7 tests: Greenfield scenario (all endpoints empty)
+  - 7 tests: Hardened scenario (resolved alerts, enabled AV, WDAC enforced, completed recommendations)
+  - 3 tests: Partial scenario (active alerts, stale AV, no WDAC)
+  - 3 tests: Query parameters ($top, $filter)
+  - 2 tests: Parameterized endpoints (machine_id variants)
+  - 2 tests: Error handling (unmapped endpoints)
+  - Plus 1 helper fixture for partial scenario server
+- **Files Created**:
+  - `tests/test_defender.py` - 458 lines, 39 tests + 1 session fixture
+- **Files Modified**: None
+- **Tests**: 39 new Defender tests + 308 existing tests = 347 total, all passing
+- **Notes**: Tests use parameterized fixtures for comprehensive coverage. Partial scenario fixture added to conftest-like structure within test file. All scenarios validated for correct Defender posture (greenfield empty, hardened secure, partial transitional).
 
 **Git Commit**:
 ```bash
@@ -3583,7 +3628,23 @@ git add -A && git commit -m "test(defender): Defender for Endpoint API tests [25
 ---
 
 ### Task 25.1 Complete — Squash Merge
-- [ ] Squash merge to main, push, clean up
+- [x] Squash merge to main, push, clean up
+
+**Completion Notes**:
+- **Implementation**: All Phase 25 (Defender for Endpoint API Surface) deliverables completed.
+  - **Subtask 25.1.1**: Added 7 new `/api/*` routes with greenfield fixtures (empty arrays, no Defender deployment)
+  - **Subtask 25.1.2**: Created hardened and partial Defender fixtures across all cloud scenarios (gcc-moderate, gcc-high, commercial-e5)
+  - **Subtask 25.1.3**: Comprehensive test suite (39 tests) covering all endpoints, scenarios, auth, and query parameters
+- **Files Created/Modified**:
+  - **New Routes**: 7 `/api/` routes in server.py (52 lines)
+  - **New Fixtures**: 37 fixture files (greenfield + hardened + partial + hardened-enforced across 3 clouds)
+  - **New Tests**: 39 tests in test_defender.py (458 lines)
+- **Test Results**: 347 tests passing (39 new + 308 existing), 0 failures
+- **Code Quality**: No TODO/FIXME in production code, all syntax valid, all tests green
+- **Git History**:
+  - e4c57fd: feat(defender): 7 Defender for Endpoint API routes with greenfield fixtures [25.1.1]
+  - 10eefd8: feat(defender): hardened and partial Defender fixtures [25.1.2]
+  - ce66b54: test(defender): Defender for Endpoint API tests [25.1.3]
 
 ---
 

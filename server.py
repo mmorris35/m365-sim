@@ -1201,6 +1201,56 @@ async def reload_fixtures(request: Request):
     )
 
 
+# Subtask 25.1.1: Defender for Endpoint API Routes
+@app.get("/api/alerts")
+async def get_defender_alerts(request: Request):
+    """GET /api/alerts — return Defender security alerts."""
+    top = parse_top_param(request)
+    return get_fixture("defender_alerts", request, top)
+
+
+@app.get("/api/apps")
+async def get_defender_apps(request: Request):
+    """GET /api/apps — return discovered applications."""
+    top = parse_top_param(request)
+    return get_fixture("defender_apps", request, top)
+
+
+@app.get("/api/deviceavinfo")
+async def get_defender_deviceavinfo(request: Request):
+    """GET /api/deviceavinfo — return device antivirus status."""
+    top = parse_top_param(request)
+    return get_fixture("defender_deviceavinfo", request, top)
+
+
+@app.get("/api/machines/{machine_id}/recommendations")
+async def get_defender_recommendations(machine_id: str, request: Request):
+    """GET /api/machines/{machine_id}/recommendations — return security recommendations per device."""
+    top = parse_top_param(request)
+    return get_fixture("defender_recommendations", request, top)
+
+
+@app.get("/api/machines/{machine_id}/vulnerabilities")
+async def get_defender_vulnerabilities(machine_id: str, request: Request):
+    """GET /api/machines/{machine_id}/vulnerabilities — return CVE objects per device."""
+    top = parse_top_param(request)
+    return get_fixture("defender_vulnerabilities", request, top)
+
+
+@app.get("/api/policies/appcontrol")
+async def get_defender_appcontrol(request: Request):
+    """GET /api/policies/appcontrol — return WDAC/AppLocker policies."""
+    top = parse_top_param(request)
+    return get_fixture("defender_appcontrol", request, top)
+
+
+@app.get("/api/vulnerabilities/machinesVulnerabilities")
+async def get_defender_machine_vulnerabilities(request: Request):
+    """GET /api/vulnerabilities/machinesVulnerabilities — return all machine vulnerabilities."""
+    top = parse_top_param(request)
+    return get_fixture("defender_machine_vulnerabilities", request, top)
+
+
 @app.api_route("/beta/{path:path}", methods=["GET", "POST", "PATCH", "DELETE", "PUT"])
 async def beta_route(path: str, request: Request):
     """Mirror /v1.0/ routes under /beta/ with context URL rewriting.

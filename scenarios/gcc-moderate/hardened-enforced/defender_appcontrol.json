@@ -1,0 +1,27 @@
+{
+  "@odata.context": "https://api.securitycenter.microsoft.com/api/policies",
+  "value": [
+    {
+      "id": "pol_001",
+      "name": "CMMC WDAC Policy - Audit Mode",
+      "description": "WDAC policy in audit mode for testing",
+      "version": "1.0.0.0",
+      "mode": "Audit",
+      "scope": "AllowMicrosoft",
+      "signingRequirement": "Signed",
+      "lastModifiedTime": "2026-03-15T10:00:00.0000000Z",
+      "createdTime": "2026-02-01T09:00:00.0000000Z"
+    },
+    {
+      "id": "pol_002",
+      "name": "CMMC WDAC Policy - Enforced",
+      "description": "WDAC policy in enforced block mode",
+      "version": "1.0.1.0",
+      "mode": "Enforce",
+      "scope": "AllowMicrosoft",
+      "signingRequirement": "Signed",
+      "lastModifiedTime": "2026-03-18T14:30:00.0000000Z",
+      "createdTime": "2026-02-01T09:00:00.0000000Z"
+    }
+  ]
+}

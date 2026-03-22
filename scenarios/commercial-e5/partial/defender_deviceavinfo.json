@@ -1,0 +1,17 @@
+{
+  "@odata.context": "https://api.securitycenter.microsoft.com/api/deviceavinfo",
+  "value": [
+    {
+      "id": "da637323391845683656_1234567890ab",
+      "computerName": "WIN-DESKTOP-001",
+      "osVersion": "10.0.19041",
+      "avSignatureVersion": "1.338.1234.0",
+      "avEngineVersion": "1.1.18000.0",
+      "avEngineUpdateTime": "2026-03-10T08:00:00.0000000Z",
+      "avSignatureUpdateTime": "2026-03-10T08:00:00.0000000Z",
+      "avIsRunning": true,
+      "avSignaturePublishingTime": "2026-03-10T05:00:00.0000000Z",
+      "antivirusProvider": "Windows Defender"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "@odata.context": "https://api.securitycenter.microsoft.com/api/recommendations",
+  "value": [
+    {
+      "id": "rec_001",
+      "recommendationName": "Enable controlled folder access",
+      "description": "Controlled folder access protects your valuable data from malware and threats",
+      "recommendationType": "ConfigurationAssessment",
+      "severity": "High",
+      "status": "Completed",
+      "statusTime": "2026-03-15T09:00:00.0000000Z",
+      "affectedEntityCount": 0,
+      "affectedMachineCount": 0
+    },
+    {
+      "id": "rec_002",
+      "recommendationName": "Keep antivirus software updated",
+      "description": "Keep your antivirus definitions and engine up to date",
+      "recommendationType": "ConfigurationAssessment",
+      "severity": "High",
+      "status": "Completed",
+      "statusTime": "2026-03-14T14:30:00.0000000Z",
+      "affectedEntityCount": 0,
+      "affectedMachineCount": 0
+    },
+    {
+      "id": "rec_003",
+      "recommendationName": "Enable firewall rules",
+      "description": "Configure and enable firewall rules to block unauthorized access",
+      "recommendationType": "ConfigurationAssessment",
+      "severity": "Medium",
+      "status": "Completed",
+      "statusTime": "2026-03-12T11:00:00.0000000Z",
+      "affectedEntityCount": 0,
+      "affectedMachineCount": 0
+    },
+    {
+      "id": "rec_004",
+      "recommendationName": "Update Windows patches",
+      "description": "Install latest Windows security updates",
+      "recommendationType": "ConfigurationAssessment",
+      "severity": "High",
+      "status": "Completed",
+      "statusTime": "2026-03-10T16:45:00.0000000Z",
+      "affectedEntityCount": 0,
+      "affectedMachineCount": 0
+    },
+    {
+      "id": "rec_005",
+      "recommendationName": "Enable attack surface reduction rules",
+      "description": "Configure attack surface reduction rules to prevent infection vectors",
+      "recommendationType": "ConfigurationAssessment",
+      "severity": "Medium",
+      "status": "Completed",
+      "statusTime": "2026-03-08T10:00:00.0000000Z",
+      "affectedEntityCount": 0,
+      "affectedMachineCount": 0
+    }
+  ]
+}

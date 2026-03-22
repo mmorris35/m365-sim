@@ -1,0 +1,41 @@
+{
+  "@odata.context": "https://api.securitycenter.microsoft.com/api/deviceavinfo",
+  "value": [
+    {
+      "id": "da637323391845683656_1234567890ab",
+      "computerName": "WIN-DESKTOP-001",
+      "osVersion": "10.0.19042",
+      "avSignatureVersion": "1.339.2039.0",
+      "avEngineVersion": "1.1.18100.4",
+      "avEngineUpdateTime": "2026-03-20T08:00:00.0000000Z",
+      "avSignatureUpdateTime": "2026-03-20T08:00:00.0000000Z",
+      "avIsRunning": true,
+      "avSignaturePublishingTime": "2026-03-20T05:00:00.0000000Z",
+      "antivirusProvider": "Windows Defender"
+    },
+    {
+      "id": "da637323391845683657_abcdef1234567890",
+      "computerName": "WIN-LAPTOP-002",
+      "osVersion": "10.0.19042",
+      "avSignatureVersion": "1.339.2039.0",
+      "avEngineVersion": "1.1.18100.4",
+      "avEngineUpdateTime": "2026-03-20T08:00:00.0000000Z",
+      "avSignatureUpdateTime": "2026-03-20T08:00:00.0000000Z",
+      "avIsRunning": true,
+      "avSignaturePublishingTime": "2026-03-20T05:00:00.0000000Z",
+      "antivirusProvider": "Windows Defender"
+    },
+    {
+      "id": "da637323391845683658_xyz9876543210abc",
+      "computerName": "WIN-SERVER-003",
+      "osVersion": "10.0.20348",
+      "avSignatureVersion": "1.339.2039.0",
+      "avEngineVersion": "1.1.18100.4",
+      "avEngineUpdateTime": "2026-03-20T08:00:00.0000000Z",
+      "avSignatureUpdateTime": "2026-03-20T08:00:00.0000000Z",
+      "avIsRunning": true,
+      "avSignaturePublishingTime": "2026-03-20T05:00:00.0000000Z",
+      "antivirusProvider": "Windows Defender"
+    }
+  ]
+}
