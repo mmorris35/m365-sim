@@ -197,8 +197,8 @@ class TestSubscribedSkus:
         assert "value" in data
         assert isinstance(data["value"], list)
 
-    def test_e5_sku_present(self, mock_server, auth_headers):
-        """Greenfield has SPE_E5 SKU."""
+    def test_gov_g5_sku_present(self, mock_server, auth_headers):
+        """Greenfield has O365_GOVERNMENT_G5 SKU."""
         response = httpx.get(
             f"{mock_server}/beta/subscribedSkus",
             headers=auth_headers,
@@ -206,17 +206,16 @@ class TestSubscribedSkus:
         data = response.json()
         assert len(data["value"]) >= 1
         sku_parts = [sku["skuPartNumber"] for sku in data["value"]]
-        assert "SPE_E5" in sku_parts
+        assert "O365_GOVERNMENT_G5" in sku_parts
 
-    def test_e5_service_plans(self, mock_server, auth_headers):
-        """E5 SKU includes expected service plans."""
+    def test_gov_g5_service_plans(self, mock_server, auth_headers):
+        """G5 SKU includes expected service plans."""
         response = httpx.get(
             f"{mock_server}/beta/subscribedSkus",
             headers=auth_headers,
         )
         data = response.json()
-        e5 = [sku for sku in data["value"] if sku["skuPartNumber"] == "SPE_E5"][0]
-        plan_names = [p["servicePlanName"] for p in e5["servicePlans"]]
-        assert "AAD_PREMIUM_P2" in plan_names
-        assert "INTUNE_A" in plan_names
-        assert "MTP" in plan_names
+        g5 = [sku for sku in data["value"] if sku["skuPartNumber"] == "O365_GOVERNMENT_G5"][0]
+        plan_names = [p["servicePlanName"] for p in g5["servicePlans"]]
+        assert "AAD_PREMIUM" in plan_names
+        assert "DEFENDER_ENDPOINT_1" in plan_names
