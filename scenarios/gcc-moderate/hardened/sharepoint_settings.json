@@ -1,0 +1,17 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#admin/sharepoint/settings/$entity",
+  "sharingCapability": "existingExternalUserSharingOnly",
+  "isSharePointMobileNotificationEnabled": true,
+  "sharingDomainRestrictionMode": "allowList",
+  "sharingAllowedDomainList": "contoso-defense.com",
+  "sharingBlockedDomainList": "",
+  "isSiteCreationEnabled": true,
+  "isSiteCreationUIEnabled": true,
+  "isSitePagesCreationEnabled": true,
+  "isSitesStorageLimitAutomatic": true,
+  "deletedUserPersonalSiteRetentionPeriodInDays": 365,
+  "isUnmanagedSyncAppForTenantRestricted": true,
+  "availableManagedPathsForSiteCreation": ["/sites/", "/teams/"],
+  "personalSiteDefaultStorageLimitInMB": 1048576,
+  "tenantDefaultTimezone": "(UTC-06:00) Central Time (US & Canada)"
+}

@@ -1,0 +1,57 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#security/informationProtection/sensitivityLabels",
+  "value": [
+    {
+      "id": "a1b2c3d4-0001-0001-0001-000000000001",
+      "name": "Public",
+      "displayName": "Public",
+      "description": "Data that is freely available to everyone. No special protection needed.",
+      "color": "#00FF00",
+      "sensitivity": 0,
+      "tooltip": "Use for non-sensitive, publicly available data.",
+      "isActive": true,
+      "isAppliable": true,
+      "contentFormats": ["file", "email"],
+      "parent": null
+    },
+    {
+      "id": "a1b2c3d4-0001-0001-0001-000000000002",
+      "name": "General",
+      "displayName": "General",
+      "description": "Business data that is not intended for public consumption.",
+      "color": "#FFFF00",
+      "sensitivity": 1,
+      "tooltip": "Use for general business data that doesn't require special protection.",
+      "isActive": true,
+      "isAppliable": true,
+      "contentFormats": ["file", "email"],
+      "parent": null
+    },
+    {
+      "id": "a1b2c3d4-0001-0001-0001-000000000003",
+      "name": "Confidential",
+      "displayName": "Confidential",
+      "description": "Sensitive business data that could cause damage if shared with unauthorized people.",
+      "color": "#FF8C00",
+      "sensitivity": 2,
+      "tooltip": "Use for sensitive data that requires encryption and access restrictions.",
+      "isActive": true,
+      "isAppliable": true,
+      "contentFormats": ["file", "email"],
+      "parent": null
+    },
+    {
+      "id": "a1b2c3d4-0001-0001-0001-000000000004",
+      "name": "Highly Confidential",
+      "displayName": "Highly Confidential",
+      "description": "Very sensitive business data that would cause significant damage if shared with unauthorized people.",
+      "color": "#FF0000",
+      "sensitivity": 3,
+      "tooltip": "Use for highly sensitive data requiring the strictest protection.",
+      "isActive": true,
+      "isAppliable": true,
+      "contentFormats": ["file", "email"],
+      "parent": null
+    }
+  ]
+}
