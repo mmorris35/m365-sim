@@ -18,6 +18,9 @@ calls against the mock server. Tests nine workflows:
 11. GCC-HIGH-SCENARIOS — GCC High hardened + partial posture
 12. BETA               — /beta/ route mirror with context URL rewriting
 13. E5-SCENARIOS       — Commercial E5 hardened + partial posture
+14. ENFORCED           — hardened-enforced with CA policies state=enabled
+15. PRIORITY-ENDPOINTS — 9 priority-1 Graph API endpoints (Phase 23)
+16. DEFENDER           — Defender for Endpoint /api/* endpoints
 
 Usage:
     python test_harness.py                             # run all workflows
@@ -1227,6 +1230,218 @@ def test_e5_scenarios() -> list[tuple[str, bool, str]]:
     return results
 
 
+# ---------------------------------------------------------------------------
+# Enforced scenario — CA policies with state: "enabled"
+# ---------------------------------------------------------------------------
+
+def test_enforced_scenario() -> list[tuple[str, bool, str]]:
+    """Test hardened-enforced scenario where CA policies are fully enabled."""
+    results = []
+    port = get_free_port()
+
+    proc = start_server(port, "hardened-enforced")
+    try:
+        client = GraphClient(f"http://localhost:{port}")
+
+        # 8 CA policies, all state: "enabled" (not report-only)
+        policies = client.get_ca_policies()
+        all_enabled = all(p.get("state") == "enabled" for p in policies)
+        results.append(("Enforced: 8 CA policies with state=enabled",
+                         len(policies) == 8 and all_enabled,
+                         f"{len(policies)} policies, all enabled={all_enabled}"))
+
+        # Break-glass still excluded
+        all_excluded = all(
+            BREAKGLASS_ID in (p.get("conditions") or {}).get("users", {}).get("excludeUsers", [])
+            for p in policies
+        )
+        results.append(("Enforced: break-glass excluded",
+                         all_excluded, f"all exclude break-glass={all_excluded}"))
+
+        # FIDO2 registered (same as hardened)
+        auth_methods = client.get_me_auth_methods()
+        fido2 = [m for m in auth_methods if "fido2" in m.get("@odata.type", "").lower()]
+        results.append(("Enforced: FIDO2 registered",
+                         len(fido2) == 1, f"{len(fido2)} FIDO2 key(s)"))
+
+        # 3 compliant devices (same as hardened)
+        devices = client.get_managed_devices()
+        results.append(("Enforced: 3 compliant devices",
+                         len(devices) == 3, f"{len(devices)} devices"))
+
+        # Org identity unchanged
+        org = client.get_organization()
+        org_name = org[0].get("displayName", "") if org else ""
+        results.append(("Enforced: org is Contoso Defense LLC",
+                         org_name == "Contoso Defense LLC",
+                         f"displayName={org_name}"))
+    finally:
+        stop_server(proc)
+
+    return results
+
+
+# ---------------------------------------------------------------------------
+# Priority-1 endpoints — Phase 23 new Graph API endpoints
+# ---------------------------------------------------------------------------
+
+def test_priority_endpoints(client: GraphClient, hardened_client: GraphClient) -> list[tuple[str, bool, str]]:
+    """Test the 9 priority-1 Graph API endpoints added in Phase 23."""
+    results = []
+
+    # Authorization policy (singleton)
+    r = client.get("/v1.0/policies/authorizationPolicy")
+    results.append(("authorizationPolicy: 200 singleton",
+                     r.status_code == 200 and "id" in r.json(),
+                     f"status={r.status_code}"))
+
+    # Subscribed SKUs (collection)
+    r = client.get("/v1.0/subscribedSkus")
+    skus = r.json().get("value", [])
+    results.append(("subscribedSkus: has SKUs",
+                     r.status_code == 200 and len(skus) > 0,
+                     f"{len(skus)} SKUs"))
+
+    # MFA registration report (singleton)
+    r = client.get("/v1.0/reports/authenticationMethods/usersRegisteredByMethod")
+    results.append(("usersRegisteredByMethod: 200 singleton",
+                     r.status_code == 200,
+                     f"status={r.status_code}"))
+
+    # Access reviews (empty greenfield, populated hardened)
+    r_g = client.get("/v1.0/identityGovernance/accessReviews/definitions")
+    r_h = hardened_client.get("/v1.0/identityGovernance/accessReviews/definitions")
+    g_count = len(r_g.json().get("value", []))
+    h_count = len(r_h.json().get("value", []))
+    results.append(("accessReviews: greenfield 0, hardened 2+",
+                     g_count == 0 and h_count >= 2,
+                     f"greenfield={g_count}, hardened={h_count}"))
+
+    # Managed app policies (empty greenfield, populated hardened)
+    r_g = client.get("/v1.0/deviceAppManagement/managedAppPolicies")
+    r_h = hardened_client.get("/v1.0/deviceAppManagement/managedAppPolicies")
+    g_count = len(r_g.json().get("value", []))
+    h_count = len(r_h.json().get("value", []))
+    results.append(("managedAppPolicies: greenfield 0, hardened 3+",
+                     g_count == 0 and h_count >= 3,
+                     f"greenfield={g_count}, hardened={h_count}"))
+
+    # Mobile apps (empty greenfield, populated hardened)
+    r_h = hardened_client.get("/v1.0/deviceAppManagement/mobileApps")
+    h_count = len(r_h.json().get("value", []))
+    results.append(("mobileApps: hardened has 5+ apps",
+                     h_count >= 5,
+                     f"hardened={h_count} apps"))
+
+    # Detected apps (empty greenfield, populated hardened)
+    r_h = hardened_client.get("/v1.0/deviceManagement/detectedApps")
+    h_count = len(r_h.json().get("value", []))
+    results.append(("detectedApps: hardened has 10+ apps",
+                     h_count >= 10,
+                     f"hardened={h_count} apps"))
+
+    # Provisioning logs (collection)
+    r = client.get("/v1.0/auditLogs/provisioning")
+    results.append(("provisioningLogs: 200 collection",
+                     r.status_code == 200 and "value" in r.json(),
+                     f"status={r.status_code}"))
+
+    # Security alerts v1 (collection)
+    r = client.get("/v1.0/security/alerts")
+    results.append(("securityAlerts v1: 200 collection",
+                     r.status_code == 200 and "value" in r.json(),
+                     f"status={r.status_code}"))
+
+    return results
+
+
+# ---------------------------------------------------------------------------
+# Defender for Endpoint API — /api/* endpoints
+# ---------------------------------------------------------------------------
+
+def test_defender_api() -> list[tuple[str, bool, str]]:
+    """Test Defender for Endpoint /api/* endpoints across scenarios."""
+    results = []
+
+    # --- Greenfield (all empty) ---
+    port_g = get_free_port()
+    proc_g = start_server(port_g, "greenfield")
+    try:
+        client = GraphClient(f"http://localhost:{port_g}")
+
+        endpoints = [
+            ("/api/alerts", "defender alerts"),
+            ("/api/apps", "defender apps"),
+            ("/api/deviceavinfo", "device AV info"),
+            ("/api/policies/appcontrol", "app control policies"),
+            ("/api/vulnerabilities/machinesVulnerabilities", "machine vulns"),
+        ]
+        for path, name in endpoints:
+            r = client.get(path)
+            count = len(r.json().get("value", []))
+            results.append((f"Greenfield {name}: empty",
+                             r.status_code == 200 and count == 0,
+                             f"status={r.status_code}, count={count}"))
+
+        # Parameterized endpoint
+        r = client.get("/api/machines/device-001/recommendations")
+        results.append(("Greenfield machine recommendations: 200",
+                         r.status_code == 200,
+                         f"status={r.status_code}"))
+    finally:
+        stop_server(proc_g)
+
+    # --- Hardened (populated) ---
+    port_h = get_free_port()
+    proc_h = start_server(port_h, "hardened")
+    try:
+        client = GraphClient(f"http://localhost:{port_h}")
+
+        # Alerts — resolved
+        r = client.get("/api/alerts")
+        alerts = r.json().get("value", [])
+        all_resolved = all(a.get("status") == "Resolved" for a in alerts) if alerts else False
+        results.append(("Hardened defender alerts: resolved",
+                         len(alerts) > 0 and all_resolved,
+                         f"{len(alerts)} alerts, all resolved={all_resolved}"))
+
+        # Device AV info — AV enabled
+        r = client.get("/api/deviceavinfo")
+        av = r.json().get("value", [])
+        results.append(("Hardened device AV: 3 devices with AV",
+                         len(av) == 3,
+                         f"{len(av)} devices"))
+
+        # App control — WDAC policies
+        r = client.get("/api/policies/appcontrol")
+        policies = r.json().get("value", [])
+        results.append(("Hardened app control: WDAC policies",
+                         len(policies) >= 2,
+                         f"{len(policies)} policies"))
+
+        # Context URL uses securitycenter
+        r = client.get("/api/alerts")
+        ctx = r.json().get("@odata.context", "")
+        results.append(("Defender context: api.securitycenter.microsoft.com",
+                         "api.securitycenter.microsoft.com" in ctx,
+                         f"context={ctx[:60]}"))
+    finally:
+        stop_server(proc_h)
+
+    # --- Auth enforcement ---
+    port_a = get_free_port()
+    proc_a = start_server(port_a, "greenfield")
+    try:
+        r = httpx.get(f"http://localhost:{port_a}/api/alerts")
+        results.append(("Defender auth: no header -> 401",
+                         r.status_code == 401,
+                         f"status={r.status_code}"))
+    finally:
+        stop_server(proc_a)
+
+    return results
+
+
 def print_results(title: str, results: list[tuple[str, bool, str]]):
     print(f"\n{'=' * 70}")
     print(f"  {title}")
@@ -1296,7 +1511,8 @@ def main():
                                  "cloud", "mock-cloud", "extended-filter",
                                  "partial", "auth", "expand",
                                  "gcc-high-scenarios", "beta",
-                                 "e5-scenarios", "all"],
+                                 "e5-scenarios", "enforced",
+                                 "priority-endpoints", "defender", "all"],
                         default="all")
     parser.add_argument("--port", type=int, default=0, help="Port (0 = auto)")
     args = parser.parse_args()
@@ -1470,6 +1686,38 @@ def main():
             e5_results = test_e5_scenarios()
             print_results("Commercial E5 Scenarios — Hardened + Partial", e5_results)
             if not all(ok for _, ok, _ in e5_results):
+                all_ok = False
+
+        # ---- ENFORCED SCENARIO workflow ----
+        if args.workflow in ("enforced", "all"):
+            print("\nTesting hardened-enforced scenario...")
+            enforced_results = test_enforced_scenario()
+            print_results("Enforced Scenario — CA Policies state=enabled", enforced_results)
+            if not all(ok for _, ok, _ in enforced_results):
+                all_ok = False
+
+        # ---- PRIORITY ENDPOINTS workflow ----
+        if args.workflow in ("priority-endpoints", "all"):
+            print("\nStarting servers for priority-1 endpoint tests...")
+            proc_g = start_server(ports[0], "greenfield")
+            procs.append(proc_g)
+            proc_h = start_server(ports[1], "hardened")
+            procs.append(proc_h)
+            g_client = GraphClient(f"http://localhost:{ports[0]}")
+            h_client = GraphClient(f"http://localhost:{ports[1]}")
+            priority_results = test_priority_endpoints(g_client, h_client)
+            print_results("Priority-1 Endpoints (Phase 23)", priority_results)
+            stop_server(proc_g); procs.remove(proc_g)
+            stop_server(proc_h); procs.remove(proc_h)
+            if not all(ok for _, ok, _ in priority_results):
+                all_ok = False
+
+        # ---- DEFENDER API workflow ----
+        if args.workflow in ("defender", "all"):
+            print("\nTesting Defender for Endpoint /api/ endpoints...")
+            defender_results = test_defender_api()
+            print_results("Defender for Endpoint API (/api/*)", defender_results)
+            if not all(ok for _, ok, _ in defender_results):
                 all_ok = False
 
     finally:
