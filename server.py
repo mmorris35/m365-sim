@@ -1054,6 +1054,25 @@ async def get_security_alerts_v1(request: Request):
     return get_fixture("security_alerts_v1", request, top)
 
 
+@app.get("/v1.0/policies/identitySecurityDefaultsEnforcementPolicy")
+async def get_security_defaults(request: Request):
+    """GET /v1.0/policies/identitySecurityDefaultsEnforcementPolicy — return identity_security_defaults fixture."""
+    return get_fixture("identity_security_defaults", request)
+
+
+@app.get("/v1.0/admin/sharepoint/settings")
+async def get_sharepoint_settings(request: Request):
+    """GET /v1.0/admin/sharepoint/settings — return sharepoint_settings fixture."""
+    return get_fixture("sharepoint_settings", request)
+
+
+@app.get("/v1.0/security/informationProtection/sensitivityLabels")
+async def get_sensitivity_labels(request: Request):
+    """GET /v1.0/security/informationProtection/sensitivityLabels — return sensitivity_labels fixture."""
+    top = parse_top_param(request)
+    return get_fixture("sensitivity_labels", request, top)
+
+
 # Subtask 3.2.1: POST and PATCH Write Stubs
 @app.post("/v1.0/identity/conditionalAccess/policies")
 async def post_ca_policy(request: Request):
@@ -1380,6 +1399,9 @@ def _path_to_fixture_name(path: str) -> str:
         "security/securityIntents": "intents",
         "deviceManagement/groupPolicyConfigurations": "group_policy_configurations",
         "deviceManagement/remoteActionAudits": "remote_action_audits",
+        "policies/identitySecurityDefaultsEnforcementPolicy": "identity_security_defaults",
+        "admin/sharepoint/settings": "sharepoint_settings",
+        "security/informationProtection/sensitivityLabels": "sensitivity_labels",
     }
 
     # Try exact match first
