@@ -75,47 +75,6 @@ def mock_server():
         process.kill()
 
 
-@pytest.fixture(scope="session")
-def mock_server_hardened():
-    """
-    Session-scoped fixture that starts m365-sim server with hardened scenario.
-    """
-    port = get_free_port()
-    url = f"http://localhost:{port}"
-
-    git_root = Path(__file__).parent.parent
-    while git_root != git_root.parent and not (git_root / ".git").exists():
-        git_root = git_root.parent
-
-    process = subprocess.Popen(
-        ["python3", "server.py", "--scenario", "hardened", "--port", str(port)],
-        cwd=str(git_root),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-
-    start_time = time.time()
-    timeout = 5
-    while time.time() - start_time < timeout:
-        try:
-            response = httpx.get(f"{url}/health", timeout=1.0)
-            if response.status_code == 200:
-                break
-        except (httpx.ConnectError, httpx.TimeoutException):
-            time.sleep(0.1)
-    else:
-        process.kill()
-        raise RuntimeError(f"Hardened server failed to start on port {port} within {timeout}s")
-
-    yield url
-
-    process.terminate()
-    try:
-        process.wait(timeout=2)
-    except subprocess.TimeoutExpired:
-        process.kill()
-
-
 @pytest.fixture
 def auth_headers():
     """Return Bearer token headers for authenticated requests."""
