@@ -47,8 +47,9 @@ Use the m365-sim-executor agent to execute subtask X.Y.Z
 - [x] Phase 23 — Priority 1 Endpoints (Issue #1)
 - [x] Phase 24 — Beta-Specific Fixtures (Issue #1)
 - [x] Phase 25 — Defender for Endpoint API Surface (Issue #2)
+- [x] Phase 26 — OAuth2 Permission Grants & Agreements Endpoints (Issue #4)
 
-**Current**: Phase 25 (Complete)
+**Current**: Phase 26 (Complete)
 **Next**: All planned phases complete ✅
 
 ---
@@ -58,8 +59,8 @@ Use the m365-sim-executor agent to execute subtask X.Y.Z
 🎉 **ALL PHASES COMPLETE** ✅
 
 The m365-sim project has reached full feature completion:
-- **25 phases implemented** (all planned work + Issue #2 complete)
-- **347 tests passing** (308 existing + 39 new Defender API tests)
+- **26 phases implemented** (all planned work + Issues #2 and #4 complete)
+- **382 tests passing**
 - **All 3 cloud targets** fully supported (gcc-moderate, gcc-high, commercial-e5)
 - **All scenarios** implemented (greenfield, hardened, hardened-enforced, partial)
 - **Microsoft Graph API** — 40+ endpoints with $filter, $expand, $top, POST/PATCH/GET operations
@@ -3645,6 +3646,48 @@ git add -A && git commit -m "test(defender): Defender for Endpoint API tests [25
   - e4c57fd: feat(defender): 7 Defender for Endpoint API routes with greenfield fixtures [25.1.1]
   - 10eefd8: feat(defender): hardened and partial Defender fixtures [25.1.2]
   - ce66b54: test(defender): Defender for Endpoint API tests [25.1.3]
+
+---
+
+## Phase 26: OAuth2 Permission Grants & Agreements Endpoints (Issue #4)
+
+**Goal**: Add two CMMC L2 compliance endpoints — `/v1.0/oauth2PermissionGrants` (AC.L2-3.1.21 — delegated permission audit) and `/v1.0/agreements` (AC.L2-3.1.20 — acceptable use policies). Both are standard `{"value": [...]}` collection endpoints with greenfield/partial/hardened fixture variants across all 3 cloud targets.
+**Duration**: 1 session
+**Issue**: https://github.com/mmorris35/m365-sim/issues/4
+
+### Task 26.1: Routes, Fixtures, and Tests
+
+**Git**: Branch `feature/26-1-oauth2-agreements`
+
+**Subtask 26.1.1: Route Handlers and GCC Moderate Fixtures**
+- [x] Add 2 GET routes to `server.py` (oauth2PermissionGrants, agreements)
+- [x] Add path mappings to `_path_to_fixture_name()`
+- [x] Create GCC Moderate greenfield fixtures (empty arrays)
+- [x] Create GCC Moderate partial fixtures (safe scopes, unenforced agreement)
+- [x] Create GCC Moderate hardened fixtures (safe scopes, enforced agreement)
+
+**Subtask 26.1.2: Cross-Cloud Fixtures**
+- [x] Copy fixtures to gcc-high (all scenarios), update context to `graph.microsoft.us`
+- [x] Copy fixtures to commercial-e5 (all scenarios), keep `graph.microsoft.com`
+- [x] Copy hardened fixtures to hardened-enforced for all 3 clouds
+
+**Subtask 26.1.3: Integration Tests**
+- [x] Create `tests/test_oauth2_agreements.py` with 18 tests
+- [x] Add `mock_server_partial` fixture to `conftest.py`
+- [x] All 382 tests passing
+
+**Subtask 26.1.4: Documentation Update**
+- [x] Update `docs/guide.md` with new endpoints
+- [x] Update DEVELOPMENT_PLAN.md status and Phase 26 section
+
+### Task 26.1 Complete — Squash Merge
+- [x] All subtasks complete (26.1.1 through 26.1.4)
+
+**Completion Notes**:
+- **Implementation**: 2 new routes, 24 fixture files (6 per gcc-moderate + 8 per gcc-high + 8 per commercial-e5 + 2 hardened-enforced), 18 new tests
+- **Files Modified**: server.py (2 routes + 2 path mappings), conftest.py (mock_server_partial), docs/guide.md
+- **Tests**: 382 total (18 new + 364 existing), all passing
+- **Git**: feature/26-1-oauth2-agreements branch, 4 commits (26.1.1–26.1.4)
 
 ---
 

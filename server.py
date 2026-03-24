@@ -1073,6 +1073,20 @@ async def get_sensitivity_labels(request: Request):
     return get_fixture("sensitivity_labels", request, top)
 
 
+@app.get("/v1.0/oauth2PermissionGrants")
+async def get_oauth2_permission_grants(request: Request):
+    """GET /v1.0/oauth2PermissionGrants — return oauth2_permission_grants fixture."""
+    top = parse_top_param(request)
+    return get_fixture("oauth2_permission_grants", request, top)
+
+
+@app.get("/v1.0/agreements")
+async def get_agreements(request: Request):
+    """GET /v1.0/agreements — return agreements fixture."""
+    top = parse_top_param(request)
+    return get_fixture("agreements", request, top)
+
+
 # Subtask 3.2.1: POST and PATCH Write Stubs
 @app.post("/v1.0/identity/conditionalAccess/policies")
 async def post_ca_policy(request: Request):
@@ -1391,6 +1405,8 @@ def _path_to_fixture_name(path: str) -> str:
         "deviceManagement/detectedApps": "detected_apps",
         "auditLogs/provisioning": "provisioning_logs",
         "security/alerts": "security_alerts_v1",
+        "oauth2PermissionGrants": "oauth2_permission_grants",
+        "agreements": "agreements",
         # Beta-only paths (not available in v1.0)
         "identityProtection/riskDetections": "risk_detections",
         "security/attackSimulation/simulations": "attack_simulations",

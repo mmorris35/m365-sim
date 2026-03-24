@@ -105,6 +105,10 @@ All combinations work: `--cloud gcc-high --scenario hardened`
 - `GET /v1.0/informationProtection/policy/labels`
 - `GET /v1.0/security/informationProtection/sensitivityLabels`
 
+### Consent & Agreements
+- `GET /v1.0/oauth2PermissionGrants`
+- `GET /v1.0/agreements`
+
 ### Licensing & Governance
 - `GET /v1.0/subscribedSkus`
 - `GET /v1.0/reports/authenticationMethods/usersRegisteredByMethod`

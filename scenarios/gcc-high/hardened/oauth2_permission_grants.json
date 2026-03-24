@@ -1,0 +1,32 @@
+{
+  "@odata.context": "https://graph.microsoft.us/v1.0/$metadata#oauth2PermissionGrants",
+  "value": [
+    {
+      "id": "grant-001",
+      "clientId": "sp-001",
+      "consentType": "AllPrincipals",
+      "expiryTime": null,
+      "principalId": null,
+      "resourceId": "sp-006",
+      "scope": "User.Read"
+    },
+    {
+      "id": "grant-002",
+      "clientId": "sp-002",
+      "consentType": "AllPrincipals",
+      "expiryTime": null,
+      "principalId": null,
+      "resourceId": "sp-006",
+      "scope": "openid profile"
+    },
+    {
+      "id": "grant-003",
+      "clientId": "sp-003",
+      "consentType": "AllPrincipals",
+      "expiryTime": null,
+      "principalId": null,
+      "resourceId": "sp-006",
+      "scope": "User.Read"
+    }
+  ]
+}
