@@ -50,7 +50,7 @@ All combinations work: `--cloud gcc-high --scenario hardened`
 
 ## Endpoints
 
-33 GET endpoints mirroring the Microsoft Graph v1.0 API, plus `/beta/` mirrors with context URL rewriting.
+50+ GET endpoints mirroring the Microsoft Graph v1.0 API, plus `/beta/` mirrors with context URL rewriting, and Defender for Endpoint API routes.
 
 ### Identity & Access
 - `GET /v1.0/users`
@@ -67,12 +67,21 @@ All combinations work: `--cloud gcc-high --scenario hardened`
 - `GET /v1.0/identity/conditionalAccess/policies`
 - `GET /v1.0/identity/conditionalAccess/namedLocations`
 
+### Policies
+- `GET /v1.0/policies/authenticationMethodsPolicy`
+- `GET /v1.0/policies/.../authenticationMethodConfigurations/{methodId}`
+- `GET /v1.0/policies/authorizationPolicy`
+- `GET /v1.0/policies/identitySecurityDefaultsEnforcementPolicy`
+
 ### Device Management
 - `GET /v1.0/devices`
 - `GET /v1.0/deviceManagement/managedDevices`
 - `GET /v1.0/deviceManagement/deviceCompliancePolicies`
 - `GET /v1.0/deviceManagement/deviceConfigurations`
 - `GET /v1.0/deviceManagement/deviceEnrollmentConfigurations`
+- `GET /v1.0/deviceManagement/detectedApps`
+- `GET /v1.0/deviceAppManagement/managedAppPolicies`
+- `GET /v1.0/deviceAppManagement/mobileApps`
 
 ### Directory Roles & RBAC
 - `GET /v1.0/directoryRoles`
@@ -82,20 +91,36 @@ All combinations work: `--cloud gcc-high --scenario hardened`
 - `GET /v1.0/roleManagement/directory/roleEligibilitySchedules`
 - `GET /v1.0/roleManagement/directory/roleAssignmentSchedules`
 
-### Authentication Methods Policy
-- `GET /v1.0/policies/authenticationMethodsPolicy`
-- `GET /v1.0/policies/.../authenticationMethodConfigurations/{methodId}`
-
 ### Security & Audit
 - `GET /v1.0/auditLogs/signIns`
 - `GET /v1.0/auditLogs/directoryAudits`
+- `GET /v1.0/auditLogs/provisioning`
 - `GET /v1.0/security/incidents`
+- `GET /v1.0/security/alerts`
 - `GET /v1.0/security/alerts_v2`
 - `GET /v1.0/security/secureScores`
 - `GET /v1.0/security/secureScoreControlProfiles`
 
-### Other
+### Information Protection & Compliance
 - `GET /v1.0/informationProtection/policy/labels`
+- `GET /v1.0/security/informationProtection/sensitivityLabels`
+
+### Licensing & Governance
+- `GET /v1.0/subscribedSkus`
+- `GET /v1.0/reports/authenticationMethods/usersRegisteredByMethod`
+- `GET /v1.0/identityGovernance/accessReviews/definitions`
+
+### SharePoint & Admin
+- `GET /v1.0/admin/sharepoint/settings`
+
+### Defender for Endpoint (`/api/`)
+- `GET /api/alerts`
+- `GET /api/apps`
+- `GET /api/deviceavinfo`
+- `GET /api/machines/{id}/recommendations`
+- `GET /api/machines/{id}/vulnerabilities`
+- `GET /api/policies/appcontrol`
+- `GET /api/vulnerabilities/machinesVulnerabilities`
 
 ### Write Operations
 - `POST /v1.0/identity/conditionalAccess/policies` → 201
@@ -104,7 +129,7 @@ All combinations work: `--cloud gcc-high --scenario hardened`
 - `POST /v1.0/deviceManagement/deviceConfigurations` → 201
 
 ### Beta API
-All endpoints above are also available under `/beta/` with `@odata.context` URLs rewritten from `v1.0` to `beta`.
+All v1.0 endpoints above are also available under `/beta/` with `@odata.context` URLs rewritten from `v1.0` to `beta`. Some endpoints have beta-specific fixtures with additional data (e.g., `attackSimulation/simulations`, `attackSimulation/simulationAutomations`).
 
 ## Query Parameters
 

@@ -1,6 +1,6 @@
 # m365-sim
 
-Drop-in Microsoft Graph API mock server for testing. Returns realistic JSON fixtures for 33+ endpoints across 3 cloud targets and 3 scenarios.
+Drop-in Microsoft Graph API mock server for testing. Returns realistic JSON fixtures for 50+ endpoints across 3 cloud targets and 3 scenarios.
 
 ## Use This Instead of Real M365
 
